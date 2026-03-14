@@ -175,6 +175,26 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('pelu_config', JSON.stringify(config));
             aplicamosConfig(); cerrarConfig();
         }
+    };window.copiarResumen = () => {
+        const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const regMes = registros.filter(r => {
+            const f = r.fecha.split('-');
+            return parseInt(f[0]) === añoActual && (parseInt(f[1]) - 1) === mesActual;
+        });
+
+        const ing = regMes.filter(r => r.tipo === 'ingreso').reduce((a, b) => a + b.monto, 0);
+        const gas = regMes.filter(r => r.tipo === 'gasto').reduce((a, b) => a + b.monto, 0);
+        const neto = ing - gas;
+
+        const texto = `📊 *RESUMEN ${meses[mesActual].toUpperCase()}*\n\n` +
+                      `✂️ Ingresos: $${ing.toLocaleString()}\n` +
+                      `💸 Gastos: $${gas.toLocaleString()}\n` +
+                      `💰 *Balance Neto: $${neto.toLocaleString()}*\n\n` +
+                      `Generado desde mi Agenda Peluquería 🚀`;
+
+        navigator.clipboard.writeText(texto).then(() => {
+            alert("✅ Resumen copiado. ¡Ya puedes pegarlo en WhatsApp!");
+        });
     };
 
     iniciar();
