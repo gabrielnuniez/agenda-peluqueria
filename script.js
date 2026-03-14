@@ -6,78 +6,34 @@ document.addEventListener('DOMContentLoaded', () => {
     let indiceEdicion = -1;
 
     let registros = JSON.parse(localStorage.getItem('pelu_datos_v6')) || [];
-    let config = JSON.parse(localStorage.getItem('pelu_config')) || { 
-        nombre: "PELUQUERÍA ELITE",
-        bannerImg: "" 
-    };
+    let config = JSON.parse(localStorage.getItem('pelu_config')) || { nombre: "PELUQUERÍA ELITE", bannerImg: "" };
 
     const contenedor = document.getElementById('calendar');
     const displayMes = document.getElementById('monthYear');
-    const modalContent = document.querySelector('.modal-content');
     const bannerBg = document.getElementById('bannerBg');
 
-    function iniciar() {
-        aplicarConfiguracion();
-        renderizar();
-    }
+    // --- LÓGICA DE SWIPE (DESLIZAR) ---
+    let touchstartX = 0;
+    let touchendX = 0;
 
-    function aplicarConfiguracion() {
+    contenedor.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; }, false);
+    contenedor.addEventListener('touchend', e => { 
+        touchendX = e.changedTouches[0].screenX;
+        if (touchendX < touchstartX - 70) nextMonth();
+        if (touchendX > touchstartX + 70) prevMonth();
+    }, false);
+
+    function iniciar() { aplicamosConfig(); renderizar(); }
+
+    function aplicamosConfig() {
         document.getElementById('txtBannerDisplay').innerText = config.nombre;
-        if (config.bannerImg) {
-            bannerBg.style.backgroundImage = `url(${config.bannerImg})`;
-        } else {
-            bannerBg.style.backgroundImage = "none";
-        }
+        if (config.bannerImg) bannerBg.style.backgroundImage = `url(${config.bannerImg})`;
     }
 
-    window.copiarResumen = () => {
-        const nombresMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-        const regMes = registros.filter(r => {
-            const f = r.fecha.split('-');
-            return parseInt(f[0]) === añoActual && (parseInt(f[1]) - 1) === mesActual;
-        });
-
-        let ing = regMes.filter(r => r.tipo === 'ingreso').reduce((a, b) => a + b.monto, 0);
-        let gas = regMes.filter(r => r.tipo === 'gasto').reduce((a, b) => a + b.monto, 0);
-
-        let texto = `📊 RESUMEN ${nombresMeses[mesActual].toUpperCase()} - ${config.nombre}\n`;
-        texto += `---------------------------\n`;
-        texto += `✂️ Turnos: $${ing.toLocaleString()}\n`;
-        texto += `💸 Gastos: $${gas.toLocaleString()}\n`;
-        texto += `💰 NETO: $${(ing - gas).toLocaleString()}\n`;
-        texto += `---------------------------\n`;
-
-        navigator.clipboard.writeText(texto).then(() => alert("Resumen copiado para WhatsApp."));
-    }
-
-    window.irAHoy = () => {
-        mesActual = hoyReal.getMonth();
-        añoActual = hoyReal.getFullYear();
-        renderizar();
-    }
-
-    window.adaptarModal = () => {
-        const tipo = document.getElementById('tipoRegistro').value;
-        const btnGuardar = document.getElementById('btnGuardar');
-        const lblNombre = document.getElementById('lblNombre');
-
-        if (tipo === 'gasto') {
-            modalContent.classList.add('modal-gasto');
-            btnGuardar.classList.add('gasto-btn');
-            btnGuardar.innerText = "Guardar Gasto 💸";
-            lblNombre.innerText = "Concepto del Gasto";
-        } else {
-            modalContent.classList.remove('modal-gasto');
-            btnGuardar.classList.remove('gasto-btn');
-            btnGuardar.innerText = "Guardar Turno ✂️";
-            lblNombre.innerText = "Nombre del Cliente";
-        }
-    }
-
-    function renderizar() {
+    window.renderizar = () => {
         contenedor.innerHTML = '';
-        const nombresMeses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-        displayMes.innerText = `${nombresMeses[mesActual]} ${añoActual}`;
+        const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        displayMes.innerText = `${meses[mesActual]} ${añoActual}`;
 
         const primerDia = new Date(añoActual, mesActual, 1).getDay();
         const totalDias = new Date(añoActual, mesActual + 1, 0).getDate();
@@ -90,68 +46,76 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         for (let dia = 1; dia <= totalDias; dia++) {
-            const fechaKey = `${añoActual}-${mesActual + 1}-${dia}`;
-            const registrosDia = registros
-                .filter(r => r.fecha === fechaKey)
-                .sort((a, b) => (a.hora || "99:99").localeCompare(b.hora || "99:99"));
+            const fKey = `${añoActual}-${mesActual + 1}-${dia}`;
+            const regDia = registros.filter(r => r.fecha === fKey);
             
             const diaDiv = document.createElement('div');
             diaDiv.className = 'day';
-            
             if(dia === hoyReal.getDate() && mesActual === hoyReal.getMonth() && añoActual === hoyReal.getFullYear()) {
                 diaDiv.style.border = "1px solid var(--pastel-blue)";
-                diaDiv.style.background = "rgba(96, 165, 250, 0.05)";
             }
 
             diaDiv.innerHTML = `<span class="day-number">${dia}</span>`;
             const list = document.createElement('div');
             list.className = 'list';
             
-            registrosDia.forEach(r => {
-                const el = document.createElement('div');
-                const esGasto = r.tipo === 'gasto';
-                let colorClase = 'morning'; 
-                if (esGasto) colorClase = 'danger';
-                else if (r.hora) {
-                    const h = parseInt(r.hora.split(':')[0]);
-                    if (h >= 12 && h < 19) colorClase = 'afternoon';
-                    else if (h >= 19) colorClase = 'evening';
-                }
-                el.className = `event ${colorClase}`;
-                el.innerText = `${esGasto ? "💸" : "✂️"} ${r.hora || ''} ${r.titulo}`;
-                el.onclick = (e) => { e.stopPropagation(); prepararEdicion(registros.indexOf(r)); };
-                list.appendChild(el);
+            regDia.forEach(r => {
+                const dot = document.createElement('div');
+                dot.className = `event ${r.tipo === 'gasto' ? 'danger' : (parseInt(r.hora) >= 18 ? 'evening' : 'morning')}`;
+                list.appendChild(dot);
             });
 
             diaDiv.appendChild(list);
-            diaDiv.onclick = () => abrirModal(fechaKey);
+            diaDiv.onclick = () => abrirModalDia(fKey);
             contenedor.appendChild(diaDiv);
         }
         actualizarEconomia();
     }
 
-    function abrirModal(fecha) {
+    // --- FLUJO DE MODALES ---
+    window.abrirModalDia = (fecha) => {
         fechaSeleccionada = fecha;
+        const regDia = registros.filter(r => r.fecha === fecha);
+        const lista = document.getElementById('listaTurnosDia');
+        document.getElementById('fechaDiaTitulo').innerText = "Día " + fecha.split('-').reverse().join('/');
+        lista.innerHTML = '';
+
+        if (regDia.length === 0) {
+            lista.innerHTML = '<p style="text-align:center; opacity:0.5; padding:20px;">Sin registros</p>';
+        } else {
+            regDia.forEach(r => {
+                const item = document.createElement('div');
+                item.className = 'lista-dia-item';
+                item.innerHTML = `<div><small>${r.hora || '--:--'}</small><div>${r.titulo}</div></div><b>$${r.monto}</b>`;
+                item.onclick = () => prepararEdicion(registros.indexOf(r));
+                lista.appendChild(item);
+            });
+        }
+        document.getElementById('modalDia').style.display = 'flex';
+    }
+
+    window.cerrarModalDia = () => document.getElementById('modalDia').style.display = 'none';
+
+    window.abrirFormularioNuevo = () => {
+        cerrarModalDia();
         indiceEdicion = -1;
         document.getElementById('nombreCliente').value = "";
         document.getElementById('horaTurno').value = "";
         document.getElementById('montoTurno').value = "";
         document.getElementById('tipoRegistro').value = "ingreso";
         document.getElementById('btnBorrar').style.display = "none";
-        adaptarModal();
         document.getElementById('modalTurno').style.display = 'flex';
     }
 
-    function prepararEdicion(id) {
+    window.prepararEdicion = (id) => {
+        cerrarModalDia();
         const r = registros[id];
         indiceEdicion = id;
-        fechaSeleccionada = r.fecha;
         document.getElementById('nombreCliente').value = r.titulo;
         document.getElementById('horaTurno').value = r.hora;
         document.getElementById('montoTurno').value = r.monto;
         document.getElementById('tipoRegistro').value = r.tipo;
         document.getElementById('btnBorrar').style.display = "block";
-        adaptarModal();
         document.getElementById('modalTurno').style.display = 'flex';
     }
 
@@ -175,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     document.getElementById('btnBorrar').onclick = () => {
-        if(confirm("¿Eliminar registro?")) {
+        if(confirm("¿Eliminar?")) {
             registros.splice(indiceEdicion, 1);
             localStorage.setItem('pelu_datos_v6', JSON.stringify(registros));
             cerrarModal();
@@ -188,48 +152,30 @@ document.addEventListener('DOMContentLoaded', () => {
             const f = r.fecha.split('-');
             return parseInt(f[0]) === añoActual && (parseInt(f[1]) - 1) === mesActual;
         });
-        const ing = regMes.filter(r => r.tipo === 'ingreso');
-        const gas = regMes.filter(r => r.tipo === 'gasto');
-        const ingT = ing.reduce((a, b) => a + b.monto, 0);
-        const gasT = gas.reduce((a, b) => a + b.monto, 0);
-
-        document.getElementById('totalIngresos').innerText = `$ ${ingT.toLocaleString()}`;
-        document.getElementById('totalGastos').innerText = `$ ${gasT.toLocaleString()}`;
-        document.getElementById('totalNeto').innerText = `$ ${(ingT - gasT).toLocaleString()}`;
-        document.getElementById('countIngresos').innerText = ing.length;
-        document.getElementById('countGastos').innerText = gas.length;
+        const ing = regMes.filter(r => r.tipo === 'ingreso').reduce((a, b) => a + b.monto, 0);
+        const gas = regMes.filter(r => r.tipo === 'gasto').reduce((a, b) => a + b.monto, 0);
+        document.getElementById('totalIngresos').innerText = `$ ${ing.toLocaleString()}`;
+        document.getElementById('totalGastos').innerText = `$ ${gas.toLocaleString()}`;
+        document.getElementById('totalNeto').innerText = `$ ${(ing - gas).toLocaleString()}`;
     }
 
-    window.abrirConfig = () => {
-        document.getElementById('configNombre').value = config.nombre;
-        document.getElementById('modalConfig').style.display = 'flex';
-    };
+    window.prevMonth = () => { mesActual--; if(mesActual<0){mesActual=11; añoActual--;} renderizar(); };
+    window.nextMonth = () => { mesActual++; if(mesActual>11){mesActual=0; añoActual++;} renderizar(); };
+    window.irAHoy = () => { mesActual = hoyReal.getMonth(); añoActual = hoyReal.getFullYear(); renderizar(); };
+    window.abrirConfig = () => { document.getElementById('configNombre').value = config.nombre; document.getElementById('modalConfig').style.display = 'flex'; };
     window.cerrarConfig = () => document.getElementById('modalConfig').style.display = 'none';
-    
     window.guardarConfig = () => {
-        const fileInput = document.getElementById('configFoto');
-        const nuevoNombre = document.getElementById('configNombre').value || "PELUQUERÍA ELITE";
-        
-        if (fileInput.files && fileInput.files[0]) {
+        const file = document.getElementById('configFoto').files[0];
+        config.nombre = document.getElementById('configNombre').value || "PELUQUERÍA ELITE";
+        if (file) {
             const reader = new FileReader();
-            reader.onload = (e) => {
-                config.nombre = nuevoNombre;
-                config.bannerImg = e.target.result;
-                localStorage.setItem('pelu_config', JSON.stringify(config));
-                aplicarConfiguracion();
-                cerrarConfig();
-            };
-            reader.readAsDataURL(fileInput.files[0]);
+            reader.onload = (e) => { config.bannerImg = e.target.result; localStorage.setItem('pelu_config', JSON.stringify(config)); aplicamosConfig(); cerrarConfig(); };
+            reader.readAsDataURL(file);
         } else {
-            config.nombre = nuevoNombre;
             localStorage.setItem('pelu_config', JSON.stringify(config));
-            aplicarConfiguracion();
-            cerrarConfig();
+            aplicamosConfig(); cerrarConfig();
         }
     };
-
-    document.getElementById('prevMonth').onclick = () => { mesActual--; if(mesActual<0){mesActual=11; añoActual--;} renderizar(); };
-    document.getElementById('nextMonth').onclick = () => { mesActual++; if(mesActual>11){mesActual=0; añoActual++;} renderizar(); };
 
     iniciar();
 });

@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
     <title>Peluquería Elite PRO</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0b0e14">
@@ -11,7 +10,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2793/2793765.png">
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2793/2793765.png">
-
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 </head>
@@ -20,9 +18,7 @@
     <header class="banner" id="mainBanner">
         <div id="bannerBg" class="banner-bg"></div>
         <div class="banner-overlay"></div>
-        
         <h1 id="txtBannerDisplay">PELUQUERÍA ELITE</h1>
-        
         <div class="banner-controls">
             <button onclick="copiarResumen()" title="Copiar Resumen">📋</button>
             <button onclick="irAHoy()" title="Ir a hoy">📅</button>
@@ -59,15 +55,24 @@
         </div>
     </footer>
 
+    <div id="modalDia" class="modal">
+        <div class="modal-content">
+            <h2 id="fechaDiaTitulo" style="margin-bottom: 15px; font-size: 18px; color: var(--pastel-blue);"></h2>
+            <div class="btn-nuevo-dia" onclick="abrirFormularioNuevo()">+ Agregar Registro</div>
+            <div id="listaTurnosDia" class="lista-dia-scroll"></div>
+            <div class="modal-btns">
+                <button class="btn-cancel" onclick="cerrarModalDia()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
     <div id="modalTurno" class="modal">
         <div class="modal-content">
             <h2 id="modalTitle">Nuevo Registro</h2>
-            
             <div class="input-group">
-                <label id="lblNombre">Nombre del Cliente</label>
-                <input type="text" id="nombreCliente" placeholder="Ej: Gabriel">
+                <label id="lblNombre">Nombre / Concepto</label>
+                <input type="text" id="nombreCliente" placeholder="Ej: Corte Degradé">
             </div>
-
             <div class="input-row">
                 <div class="input-group">
                     <label>Hora</label>
@@ -78,7 +83,6 @@
                     <input type="number" id="montoTurno" placeholder="0">
                 </div>
             </div>
-
             <div class="input-group">
                 <label>Categoría</label>
                 <select id="tipoRegistro" onchange="adaptarModal()">
@@ -86,11 +90,10 @@
                     <option value="gasto">Gasto (Egreso) 💸</option>
                 </select>
             </div>
-
             <div class="modal-btns">
-                <button class="btn-confirm" id="btnGuardar">Guardar Turno</button>
-                <button class="btn-delete" id="btnBorrar" style="display:none;">Eliminar Registro</button>
-                <button class="btn-cancel" onclick="cerrarModal()">Cerrar</button>
+                <button class="btn-confirm" id="btnGuardar">Guardar</button>
+                <button class="btn-delete" id="btnBorrar" style="display:none;">Eliminar</button>
+                <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
             </div>
         </div>
     </div>
@@ -98,20 +101,16 @@
     <div id="modalConfig" class="modal">
         <div class="modal-content">
             <h2>Personalización</h2>
-            
             <div class="input-group">
                 <label>Nombre del Negocio</label>
                 <input type="text" id="configNombre">
             </div>
-
             <div class="input-group">
-                <label>Imagen de Banner (Opcional)</label>
-                <input type="file" id="configFoto" accept="image/*" style="padding: 8px;">
-                <p style="font-size: 10px; color: var(--text-muted); margin-top: 5px;">Se recomienda una imagen alargada.</p>
+                <label>Imagen de Banner</label>
+                <input type="file" id="configFoto" accept="image/*">
             </div>
-
             <div class="modal-btns">
-                <button class="btn-confirm" onclick="guardarConfig()">Aplicar y Guardar</button>
+                <button class="btn-confirm" onclick="guardarConfig()">Aplicar</button>
                 <button class="btn-cancel" onclick="cerrarConfig()">Volver</button>
             </div>
         </div>
