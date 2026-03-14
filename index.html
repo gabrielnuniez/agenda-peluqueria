@@ -5,31 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Peluquería Elite PRO</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0b0e14">
+    <meta name="theme-color" content="#1C1B1F">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2793/2793765.png">
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2793/2793765.png">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <header class="banner" id="mainBanner">
         <div id="bannerBg" class="banner-bg"></div>
-        <div class="banner-overlay"></div>
-        <h1 id="txtBannerDisplay">PELUQUERÍA ELITE</h1>
+        <h1 id="txtBannerDisplay">BARBERIA 41545</h1>
         <div class="banner-controls">
-            <button onclick="copiarResumen()" title="Copiar Resumen">📋</button>
-            <button onclick="irAHoy()" title="Ir a hoy">📅</button>
-            <button onclick="abrirConfig()" title="Configuración">⚙️</button>
+            <button type="button" onclick="window.copiarResumen()" title="Copiar Resumen">📋</button>
+            <button type="button" onclick="window.irAHoy()" title="Ir a hoy">📅</button>
+            <button type="button" onclick="window.abrirConfig()" title="Configuración">⚙️</button>
         </div>
     </header>
 
     <nav class="header-nav">
-        <button id="prevMonth">◀</button>
+        <button id="prevMonth" class="btn-nav"><span>&#10094;</span></button>
         <h2 id="monthYear">MES AÑO</h2>
-        <button id="nextMonth">▶</button>
+        <button id="nextMonth" class="btn-nav"><span>&#10095;</span></button>
     </nav>
 
     <div class="weekdays-grid">
@@ -42,76 +41,88 @@
 
     <footer id="footer-summary">
         <div class="stat-box">
-            <span class="stat-label">Ingresos (<span id="countIngresos">0</span>)</span>
-            <span id="totalIngresos" class="stat-value success">$ 0</span>
+            <span class="stat-label">Ingresos</span>
+            <span id="totalIngresos" class="stat-value" style="color: var(--md-ingreso);">$ 0</span>
         </div>
         <div class="stat-box">
-            <span class="stat-label">Gastos (<span id="countGastos">0</span>)</span>
-            <span id="totalGastos" class="stat-value danger-text">$ 0</span>
+            <span class="stat-label">Gastos</span>
+            <span id="totalGastos" class="stat-value" style="color: var(--md-sys-color-error);">$ 0</span>
         </div>
-        <div class="stat-box">
-            <span class="stat-label">Balance Neto</span>
-            <span id="totalNeto" class="stat-value info">$ 0</span>
+        <div class="stat-box destacado">
+            <span class="stat-label">Balance</span>
+            <span id="totalNeto" class="stat-value">$ 0</span>
         </div>
     </footer>
 
     <div id="modalDia" class="modal">
         <div class="modal-content">
-            <h2 id="fechaDiaTitulo" style="margin-bottom: 15px; font-size: 18px; color: var(--pastel-blue);"></h2>
-            <div class="btn-nuevo-dia" onclick="abrirFormularioNuevo()">+ Agregar Registro</div>
+            <div class="modal-handle"></div> 
+            <h2 id="fechaDiaTitulo">--/--/----</h2>
+            
+            <div class="btn-nuevo-dia" onclick="window.abrirFormularioNuevo()">
+                + Agregar Registro
+            </div>
+            
             <div id="listaTurnosDia" class="lista-dia-scroll"></div>
+
             <div class="modal-btns">
-                <button class="btn-cancel" onclick="cerrarModalDia()">Cerrar</button>
+                <button class="btn-cancel" onclick="window.cerrarModalDia()">CERRAR</button>
             </div>
         </div>
     </div>
 
     <div id="modalTurno" class="modal">
         <div class="modal-content">
+            <div class="modal-handle"></div>
             <h2 id="modalTitle">Nuevo Registro</h2>
+            
             <div class="input-group">
-                <label id="lblNombre">Nombre / Concepto</label>
+                <label>Nombre o Concepto</label>
                 <input type="text" id="nombreCliente" placeholder="Ej: Corte Degradé">
             </div>
+            
             <div class="input-row">
                 <div class="input-group">
                     <label>Hora</label>
                     <input type="time" id="horaTurno">
                 </div>
                 <div class="input-group">
-                    <label>Monto $</label>
+                    <label>Monto ($)</label>
                     <input type="number" id="montoTurno" placeholder="0">
                 </div>
             </div>
+            
             <div class="input-group">
-                <label>Categoría</label>
-                <select id="tipoRegistro" onchange="adaptarModal()">
-                    <option value="ingreso">Turno (Ingreso) ✂️</option>
-                    <option value="gasto">Gasto (Egreso) 💸</option>
+                <label>Tipo de movimiento</label>
+                <select id="tipoRegistro">
+                    <option value="ingreso">✂️ Turno (Ingreso)</option>
+                    <option value="gasto">💸 Gasto (Egreso)</option>
                 </select>
             </div>
+            
             <div class="modal-btns">
-                <button class="btn-confirm" id="btnGuardar">Guardar</button>
-                <button class="btn-delete" id="btnBorrar" style="display:none;">Eliminar</button>
-                <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn-confirm" id="btnGuardar">GUARDAR CAMBIOS</button>
+                <button class="btn-delete" id="btnBorrar" style="display:none;">ELIMINAR PERMANENTE</button>
+                <button class="btn-cancel" onclick="window.cerrarModal()">DESCARTAR</button>
             </div>
         </div>
     </div>
 
     <div id="modalConfig" class="modal">
         <div class="modal-content">
-            <h2>Personalización</h2>
+            <div class="modal-handle"></div>
+            <h2>Ajustes de Perfil</h2>
             <div class="input-group">
                 <label>Nombre del Negocio</label>
                 <input type="text" id="configNombre">
             </div>
             <div class="input-group">
-                <label>Imagen de Banner</label>
+                <label>Foto de Portada (Banner)</label>
                 <input type="file" id="configFoto" accept="image/*">
             </div>
             <div class="modal-btns">
-                <button class="btn-confirm" onclick="guardarConfig()">Aplicar</button>
-                <button class="btn-cancel" onclick="cerrarConfig()">Volver</button>
+                <button class="btn-confirm" onclick="window.guardarConfig()">GUARDAR CONFIGURACIÓN</button>
+                <button class="btn-cancel" onclick="window.cerrarConfig()">VOLVER</button>
             </div>
         </div>
     </div>
