@@ -16,6 +16,29 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- NAVEGACIÓN (BOTONES < >) ---
     document.getElementById('prevMonth').onclick = (e) => { e.preventDefault(); prevMonth(); };
     document.getElementById('nextMonth').onclick = (e) => { e.preventDefault(); nextMonth(); };
+    // --- LÓGICA DE SWIPE (DESLIZAR CON EL DEDO) ---
+    let touchstartX = 0;
+    let touchendX = 0;
+
+    // Escuchamos el toque en el contenedor del calendario
+    contenedor.addEventListener('touchstart', e => { 
+        touchstartX = e.changedTouches[0].screenX; 
+    }, {passive: true});
+
+    contenedor.addEventListener('touchend', e => { 
+        touchendX = e.changedTouches[0].screenX;
+        handleGesture();
+    }, {passive: true});
+
+    function handleGesture() {
+        // Si el deslizamiento es mayor a 70 pixeles, cambiamos de mes
+        if (touchendX < touchstartX - 70) {
+            window.nextMonth(); // Deslizar a la izquierda -> Siguiente
+        }
+        if (touchendX > touchstartX + 70) {
+            window.prevMonth(); // Deslizar a la derecha -> Anterior
+        }
+    }
 
     function iniciar() { 
         aplicamosConfig(); 
