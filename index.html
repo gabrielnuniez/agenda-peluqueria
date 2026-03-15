@@ -4,15 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Peluquería Elite PRO</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1C1B1F">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2793/2793765.png">
-    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2793/2793765.png">
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -21,9 +14,9 @@
         <div id="bannerBg" class="banner-bg"></div>
         <h1 id="txtBannerDisplay">BARBERIA 41545</h1>
         <div class="banner-controls">
-            <button type="button" onclick="window.copiarResumen()" title="Copiar Resumen">📋</button>
-            <button type="button" onclick="window.irAHoy()" title="Ir a hoy">📅</button>
-            <button type="button" onclick="window.abrirConfig()" title="Configuración">⚙️</button>
+            <button type="button" onclick="window.copiarResumen()">📋</button>
+            <button type="button" onclick="window.irAHoy()">📅</button>
+            <button type="button" onclick="window.abrirConfig()">⚙️</button>
         </div>
     </header>
 
@@ -44,11 +37,11 @@
     <footer id="footer-summary">
         <div class="stat-box">
             <span class="stat-label">Ingresos</span>
-            <span id="totalIngresos" class="stat-value" style="color: var(--md-ingreso);">$ 0</span>
+            <span id="totalIngresos" class="stat-value" style="color: #B2F2BB;">$ 0</span>
         </div>
         <div class="stat-box">
             <span class="stat-label">Gastos</span>
-            <span id="totalGastos" class="stat-value" style="color: var(--md-sys-color-error);">$ 0</span>
+            <span id="totalGastos" class="stat-value" style="color: #F2B8B5;">$ 0</span>
         </div>
         <div class="stat-box destacado">
             <span class="stat-label">Balance</span>
@@ -56,9 +49,55 @@
         </div>
     </footer>
 
-    <div id="modalDia" class="modal"><div class="modal-content"><div class="modal-handle"></div><h2 id="fechaDiaTitulo"></h2><div class="btn-nuevo-dia" onclick="window.abrirFormularioNuevo()">+ Agregar</div><div id="listaTurnosDia"></div><button onclick="window.cerrarModalDia()">CERRAR</button></div></div>
-    <div id="modalConfig" class="modal"><div class="modal-content"><h2>Config</h2><input type="text" id="configNombre"><input type="file" id="configFoto"><button onclick="window.guardarConfig()">OK</button><button onclick="window.cerrarConfig()">X</button></div></div>
-    <div id="modalTurno" class="modal"><div class="modal-content"><h2 id="modalTitle"></h2><input type="text" id="nombreCliente"><input type="time" id="horaTurno"><input type="number" id="montoTurno"><select id="tipoRegistro"><option value="ingreso">Turno</option><option value="gasto">Gasto</option></select><button id="btnGuardar">G</button><button id="btnBorrar">B</button><button onclick="window.cerrarModal()">X</button></div></div>
+    <div id="modalDia" class="modal">
+        <div class="modal-content">
+            <div class="modal-handle"></div>
+            <h2 id="fechaDiaTitulo">--/--/----</h2>
+            <div class="btn-nuevo-dia" onclick="window.abrirFormularioNuevo()">+ Agregar Registro</div>
+            <div id="listaTurnosDia" class="lista-dia-scroll"></div>
+            <div class="modal-btns">
+                <button class="btn-cancel" onclick="window.cerrarModalDia()">CERRAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalTurno" class="modal">
+        <div class="modal-content">
+            <div class="modal-handle"></div>
+            <h2 id="modalTitle">Nuevo Registro</h2>
+            <div class="input-group">
+                <input type="text" id="nombreCliente" placeholder="Nombre o Concepto">
+            </div>
+            <div class="input-row" style="display:flex; gap:10px;">
+                <input type="time" id="horaTurno" style="flex:1;">
+                <input type="number" id="montoTurno" placeholder="Monto $" style="flex:1;">
+            </div>
+            <div class="input-group">
+                <select id="tipoRegistro">
+                    <option value="ingreso">✂️ Turno (Ingreso)</option>
+                    <option value="gasto">💸 Gasto (Egreso)</option>
+                </select>
+            </div>
+            <div class="modal-btns">
+                <button class="btn-confirm" id="btnGuardar">GUARDAR CAMBIOS</button>
+                <button class="btn-delete" id="btnBorrar" style="display:none;">ELIMINAR</button>
+                <button class="btn-cancel" onclick="window.cerrarModal()">DESCARTAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalConfig" class="modal">
+        <div class="modal-content">
+            <div class="modal-handle"></div>
+            <h2>Ajustes</h2>
+            <input type="text" id="configNombre" placeholder="Nombre Barbería">
+            <input type="file" id="configFoto" accept="image/*">
+            <div class="modal-btns">
+                <button class="btn-confirm" onclick="window.guardarConfig()">GUARDAR</button>
+                <button class="btn-cancel" onclick="window.cerrarConfig()">VOLVER</button>
+            </div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>

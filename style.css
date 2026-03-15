@@ -1,180 +1,27 @@
 :root {
     --md-sys-color-primary: #D0BCFF;
-    --md-sys-color-on-primary: #381E72;
-    --md-sys-color-secondary: #CCC2DC;
-    --md-sys-color-surface: #1C1B1F;
-    --md-sys-color-surface-variant: #49454F;
-    --md-sys-color-on-surface: #E6E1E5;
-    --md-sys-color-on-surface-variant: #CAC4D0;
-    --md-sys-color-outline: #938F99;
-    --md-sys-color-error: #F2B8B5;
-    
-    --md-ingreso: #B2F2BB; 
-    --md-gasto: #FFC9C9;   
-    --md-tarde: #FFD8A8;   
-    
-    --shadow-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-    --shadow-2: 0 4px 6px rgba(0,0,0,0.3);
+    --background: #1C1B1F;
+    --surface: #25232a;
 }
+body { background: var(--background); color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding-bottom: 80px; }
+.banner { height: 120px; position: relative; display: flex; align-items: center; padding: 0 20px; }
+.banner-bg { position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&q=80'); background-size: cover; z-index: -1; }
+.weekdays-grid { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; padding: 10px 0; font-size: 12px; opacity: 0.6; }
+#calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: rgba(255,255,255,0.05); }
+.day { min-height: 90px; background: var(--background); padding: 5px; position: relative; }
+.day.today { background: rgba(208, 188, 255, 0.1); border: 1px solid var(--md-sys-color-primary); }
+.event { height: 4px; border-radius: 2px; margin-bottom: 2px; }
+.morning { background: #bb86fc; }
+.evening { background: #03dac6; }
+.danger { background: #cf6679; }
 
-* { 
-    box-sizing: border-box; 
-    margin: 0; 
-    padding: 0; 
-    -webkit-tap-highlight-color: transparent;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-}
-
-body { 
-    background-color: var(--md-sys-color-surface); 
-    color: var(--md-sys-color-on-surface);
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-/* --- BANNER --- */
-.banner { 
-    height: 100px; 
-    position: relative; 
-    display: flex; 
-    align-items: flex-end; 
-    padding: 15px 20px;
-    background: #000;
-}
-.banner-bg { 
-    position: absolute; inset: 0; 
-    background-size: cover; 
-    background-position: center; 
-    opacity: 0.4;
-}
-.banner h1 { 
-    z-index: 2; 
-    font-size: 20px; 
-    font-weight: 800; 
-    color: #fff;
-}
-.banner-controls { 
-    position: absolute; top: 45px; right: 20px; 
-    display: flex; gap: 10px; z-index: 3; 
-}
-.banner-controls button { 
-    background: rgba(255,255,255,0.1); 
-    backdrop-filter: blur(5px);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 50%; width: 38px; height: 38px; color: white;
-}
-
-/* --- NAVEGACIÓN --- */
-.header-nav { 
-    padding: 10px 20px;
-    display: flex; justify-content: space-between; align-items: center; 
-}
-#monthYear { font-size: 18px; font-weight: 700; color: var(--md-sys-color-primary); }
-
-.btn-nav { 
-    background: var(--md-sys-color-surface-variant);
-    border: none; color: white;
-    width: 42px; height: 42px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 18px;
-}
-
-/* --- CALENDARIO --- */
-.weekdays-grid { 
-    display: grid; grid-template-columns: repeat(7, 1fr); 
-    padding: 5px 10px; font-size: 11px; font-weight: 700;
-    color: var(--md-sys-color-outline); text-align: center;
-}
-#calendar-container { flex: 1; padding: 0 10px 10px; }
-#calendar { 
-    display: grid; grid-template-columns: repeat(7, 1fr); 
-    grid-template-rows: repeat(6, 1fr); gap: 4px; height: 100%;
-}
-.day { 
-    background: var(--md-sys-color-surface-variant);
-    border-radius: 12px; padding: 5px; display: flex; flex-direction: column;
-}
-.day-number { font-size: 12px; font-weight: 600; text-align: right; }
-.list { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; margin-top: 4px; }
-.event { width: 6px; height: 6px; border-radius: 50%; }
-
-.morning { background: var(--md-ingreso); }
-.afternoon { background: var(--md-tarde); }
-.evening { background: var(--md-sys-color-primary); }
-.danger { background: var(--md-sys-color-error); }
-
-/* --- MODALES Y LISTADO (CORREGIDO) --- */
-.modal { 
-    display: none; position: fixed; inset: 0; 
-    background: rgba(0,0,0,0.85); z-index: 1000; align-items: flex-end; 
-}
-.modal-content { 
-    background: #2B2930; width: 100%; border-radius: 28px 28px 0 0; 
-    padding: 24px; animation: slideUp 0.3s cubic-bezier(0, 0, 0.2, 1);
-    max-height: 90vh; display: flex; flex-direction: column;
-}
-@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-.modal-handle { 
-    width: 40px; height: 4px; background: var(--md-sys-color-outline); 
-    border-radius: 2px; margin: 0 auto 20px; flex-shrink: 0;
-}
-
-/* Estilos de la lista de turnos */
-.lista-dia-scroll {
-    overflow-y: auto;
-    margin-bottom: 20px;
-    padding-right: 4px;
-    -webkit-overflow-scrolling: touch;
-}
-.lista-dia-item { 
-    background: #36343B;
-    margin-bottom: 8px;
-    padding: 16px;
-    border-radius: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 1px solid rgba(255,255,255,0.05);
-}
-
-/* --- BOTONES --- */
-.modal-btns { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
-
-.btn-confirm { 
-    background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary);
-    border: none; padding: 16px; border-radius: 100px; 
-    font-weight: 700; cursor: pointer; font-size: 14px; text-transform: uppercase;
-}
-.btn-delete { 
-    background: rgba(242, 184, 181, 0.1); color: var(--md-sys-color-error);
-    border: 1px solid var(--md-sys-color-error); padding: 14px; 
-    border-radius: 100px; font-weight: 700; cursor: pointer; text-transform: uppercase;
-}
-.btn-cancel { 
-    background: transparent; color: var(--md-sys-color-primary);
-    border: none; padding: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase;
-}
-.btn-nuevo-dia { 
-    background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary);
-    padding: 16px; border-radius: 16px; text-align: center; 
-    font-weight: 700; margin-bottom: 20px; flex-shrink: 0;
-}
-
-/* --- FORMULARIOS --- */
-.input-group { margin-bottom: 15px; }
-.input-group label { display: block; font-size: 12px; color: var(--md-sys-color-on-surface-variant); margin-bottom: 5px; }
-input, select { 
-    width: 100%; background: #1D1B20; border: 1px solid var(--md-sys-color-outline);
-    padding: 14px; border-radius: 10px; color: white; font-size: 16px;
-}
-.input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-/* --- FOOTER --- */
-#footer-summary { height: 85px; background: #2B2930; display: flex; padding: 0 10px; align-items: center; gap: 8px; flex-shrink: 0; }
-.stat-box { flex: 1; background: #36343B; padding: 10px; border-radius: 12px; text-align: center; }
-.stat-box.destacado { background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
-.stat-label { font-size: 9px; opacity: 0.8; text-transform: uppercase; display: block; }
-.stat-value { font-size: 14px; font-weight: 700; }
+/* MODALES */
+.modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); display: none; align-items: flex-end; z-index: 1000; }
+.modal-content { background: var(--surface); width: 100%; border-radius: 28px 28px 0 0; padding: 24px; }
+.modal-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.2); margin: 0 auto 20px; border-radius: 2px; }
+.modal-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+input, select { width: 100%; padding: 15px; margin: 10px 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: #fff; box-sizing: border-box; }
+.btn-confirm { background: var(--md-sys-color-primary); color: #381E72; padding: 15px; border-radius: 12px; font-weight: bold; border: none; cursor: pointer; }
+.btn-cancel { background: transparent; color: #fff; padding: 12px; border: none; cursor: pointer; }
+.btn-delete { background: #cf6679; color: #fff; padding: 12px; border-radius: 12px; border: none; }
+.lista-dia-item { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
