@@ -25,12 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 registros = [...localesLimpios, ...registrosNube];
                 renderizar();
             }
-        } catch (err) { console.error(err); }
+        } catch (err) { console.error("Error nube:", err); }
     }
 
     window.renderizar = () => {
         contenedor.innerHTML = '';
-        const meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
+        const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
         displayMes.innerText = `${meses[mesActual]} ${añoActual}`;
 
         const primerDia = new Date(añoActual, mesActual, 1).getDay();
@@ -77,8 +77,11 @@ document.addEventListener('DOMContentLoaded', () => {
         regDia.forEach((r, idx) => {
             const item = document.createElement('div');
             item.className = 'lista-dia-item';
-            item.innerHTML = `<div><small>${r.hora}</small><br><b>${r.esNube ? '🤖' : '✂️'} ${r.titulo}</b></div><span>$${r.monto}</span>`;
-            if(!r.esNube) item.onclick = (e) => { e.stopPropagation(); prepararEdicion(registros.indexOf(r)); };
+            item.innerHTML = `
+                <div><small>${r.hora}</small><br><b>${r.esNube ? '🤖' : '✂️'} ${r.titulo}</b></div>
+                <span style="font-weight:800; color:${r.tipo==='gasto'?'#F2B8B5':'#B2F2BB'}">$${r.monto}</span>
+            `;
+            if(!r.esNube) item.onclick = (e) => { e.stopPropagation(); window.prepararEdicion(registros.indexOf(r)); };
             lista.appendChild(item);
         });
         document.getElementById('modalDia').style.display = 'flex';
@@ -87,6 +90,23 @@ document.addEventListener('DOMContentLoaded', () => {
     window.abrirFormularioNuevo = () => {
         window.cerrarModalDia();
         indiceEdicion = -1;
+        document.getElementById('modalTitle').innerText = "Nuevo Registro";
+        document.getElementById('nombreCliente').value = "";
+        document.getElementById('montoTurno').value = "";
+        document.getElementById('btnBorrar').style.display = "none";
+        document.getElementById('modalTurno').style.display = 'flex';
+    };
+
+    window.prepararEdicion = (idx) => {
+        window.cerrarModalDia();
+        const r = registros[idx];
+        indiceEdicion = idx;
+        document.getElementById('modalTitle').innerText = "Editar Registro";
+        document.getElementById('nombreCliente').value = r.titulo;
+        document.getElementById('horaTurno').value = r.hora;
+        document.getElementById('montoTurno').value = r.monto;
+        document.getElementById('tipoRegistro').value = r.tipo;
+        document.getElementById('btnBorrar').style.display = "block";
         document.getElementById('modalTurno').style.display = 'flex';
     };
 
@@ -96,7 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
             titulo: document.getElementById('nombreCliente').value,
             hora: document.getElementById('horaTurno').value,
             monto: document.getElementById('montoTurno').value,
-            tipo: document.getElementById('tipoRegistro').value
+            tipo: document.getElementById('tipoRegistro').value,
+            esNube: false
         };
         if(indiceEdicion > -1) registros[indiceEdicion] = dato; else registros.push(dato);
         localStorage.setItem('pelu_datos_v6', JSON.stringify(registros.filter(r => !r.esNube)));
@@ -104,14 +125,23 @@ document.addEventListener('DOMContentLoaded', () => {
         renderizar();
     };
 
+    document.getElementById('btnBorrar').onclick = () => {
+        if(confirm("¿Eliminar este registro?")) {
+            registros.splice(indiceEdicion, 1);
+            localStorage.setItem('pelu_datos_v6', JSON.stringify(registros.filter(r => !r.esNube)));
+            window.cerrarModal();
+            renderizar();
+        }
+    };
+
     function actualizarEconomia() {
         const mesStr = `${añoActual}-${String(mesActual+1).padStart(2,'0')}`;
         const regMes = registros.filter(r => r.fecha.startsWith(mesStr));
         const ing = regMes.filter(r => r.tipo === 'ingreso').reduce((a, b) => a + Number(b.monto), 0);
         const gas = regMes.filter(r => r.tipo === 'gasto').reduce((a, b) => a + Number(b.monto), 0);
-        document.getElementById('totalIngresos').innerText = `$${ing}`;
-        document.getElementById('totalGastos').innerText = `$${gas}`;
-        document.getElementById('totalNeto').innerText = `$${ing - gas}`;
+        document.getElementById('totalIngresos').innerText = `$${ing.toLocaleString()}`;
+        document.getElementById('totalGastos').innerText = `$${gas.toLocaleString()}`;
+        document.getElementById('totalNeto').innerText = `$${(ing - gas).toLocaleString()}`;
     }
 
     document.getElementById('prevMonth').onclick = () => { mesActual--; if(mesActual<0){mesActual=11; añoActual--;} renderizar(); };
