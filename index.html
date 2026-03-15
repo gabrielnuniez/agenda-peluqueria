@@ -56,39 +56,10 @@
         </div>
     </footer>
 
+    <div id="modalDia" class="modal"><div class="modal-content"><div class="modal-handle"></div><h2 id="fechaDiaTitulo"></h2><div class="btn-nuevo-dia" onclick="window.abrirFormularioNuevo()">+ Agregar</div><div id="listaTurnosDia"></div><button onclick="window.cerrarModalDia()">CERRAR</button></div></div>
+    <div id="modalConfig" class="modal"><div class="modal-content"><h2>Config</h2><input type="text" id="configNombre"><input type="file" id="configFoto"><button onclick="window.guardarConfig()">OK</button><button onclick="window.cerrarConfig()">X</button></div></div>
+    <div id="modalTurno" class="modal"><div class="modal-content"><h2 id="modalTitle"></h2><input type="text" id="nombreCliente"><input type="time" id="horaTurno"><input type="number" id="montoTurno"><select id="tipoRegistro"><option value="ingreso">Turno</option><option value="gasto">Gasto</option></select><button id="btnGuardar">G</button><button id="btnBorrar">B</button><button onclick="window.cerrarModal()">X</button></div></div>
+
     <script src="script.js"></script>
-    
-    <script>
-        // --- CONEXIÓN DIRECTA CON EL BOT ---
-        const SUPABASE_URL = 'https://neyvklveqledlurvpcmr.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5leXZrbHZlcWxlZGx1cnZwY21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MzQ3NjYsImV4cCI6MjA4OTExMDc2Nn0.JVlEPagEGj-Tz7jY5OvrozXvjXA41CPkb0wxgJVrWRE';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        async function sincronizarConBot() {
-            try {
-                const { data, error } = await supabaseClient
-                    .from('turnos')
-                    .select('*')
-                    .eq('barberia_id', 'barberia_41545');
-
-                if (error) throw error;
-
-                console.log("Datos recibidos del bot:", data);
-                
-                // Si tu script.js tiene una función para redibujar el calendario, 
-                // aquí deberíamos llamarla pasando los 'data'.
-                if(typeof window.actualizarInterfaz === 'function'){
-                    window.actualizarInterfaz(data);
-                }
-
-            } catch (err) {
-                console.error("Error de sincronización:", err);
-            }
-        }
-
-        // Ejecutar sincronización cada 10 segundos
-        setInterval(sincronizarConBot, 10000);
-        sincronizarConBot();
-    </script>
 </body>
 </html>
