@@ -11,16 +11,19 @@
 <body>
 
     <header class="banner">
-        <div class="banner-bg"></div>
+        <div id="bannerBg" class="banner-bg"></div>
         <div class="banner-content">
             <h1 id="txtBannerDisplay">BARBERIA 4154</h1>
-            <button class="btn-hoy-top" onclick="window.irAHoy()">📅 Hoy</button>
+            <div class="banner-actions">
+                <button class="btn-icon" onclick="window.abrirConfig()">⚙️</button>
+                <button class="btn-hoy-top" onclick="window.irAHoy()">📅 Hoy</button>
+            </div>
         </div>
     </header>
 
     <nav class="header-nav">
         <button id="prevMonth" class="btn-nav-circle"><span>&#10094;</span></button>
-        <h2 id="monthYear">MARZO 2026</h2>
+        <h2 id="monthYear">--</h2>
         <button id="nextMonth" class="btn-nav-circle"><span>&#10095;</span></button>
     </nav>
 
@@ -41,7 +44,7 @@
             <span class="stat-label">Gastos</span>
             <span id="totalGastos" class="stat-value" style="color: #F2B8B5;">$ 0</span>
         </div>
-        <div class="stat-box destacado">
+        <div class="stat-box">
             <span class="stat-label">Neto</span>
             <span id="totalNeto" class="stat-value">$ 0</span>
         </div>
@@ -51,7 +54,7 @@
         <div class="modal-content card-material">
             <div class="modal-handle"></div>
             <h2 id="fechaDiaTitulo" class="modal-date-title">--/--/----</h2>
-            <button class="btn-primary-full" onclick="window.abrirFormularioNuevo()">+ Agregar</button>
+            <button class="btn-primary-full" onclick="window.abrirFormularioNuevo()">+ NUEVO REGISTRO</button>
             <div id="listaTurnosDia" class="scroll-area"></div>
             <button class="btn-text-only" onclick="window.cerrarModalDia()">CERRAR</button>
         </div>
@@ -74,8 +77,25 @@
             </div>
             <div class="modal-btns-vertical">
                 <button class="btn-primary-full" id="btnGuardar">GUARDAR</button>
-                <button class="btn-danger-link" id="btnBorrar" style="display:none;">ELIMINAR</button>
+                <button class="btn-danger-full" id="btnBorrar" style="display:none;">ELIMINAR REGISTRO</button>
                 <button class="btn-text-only" onclick="window.cerrarModal()">CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalConfig" class="modal">
+        <div class="modal-content card-material">
+            <div class="modal-handle"></div>
+            <h2>Configuración</h2>
+            <div class="input-group">
+                <label style="font-size: 12px; opacity: 0.7;">Nombre de la Barbería</label>
+                <input type="text" id="cfgTitulo" placeholder="Ej: BARBERIA 4154">
+                <label style="font-size: 12px; opacity: 0.7;">URL Imagen de Fondo</label>
+                <input type="text" id="cfgFondo" placeholder="https://imagen.com/foto.jpg">
+            </div>
+            <div class="modal-btns-vertical">
+                <button class="btn-primary-full" onclick="window.guardarConfig()">APLICAR CAMBIOS</button>
+                <button class="btn-text-only" onclick="window.cerrarConfig()">VOLVER</button>
             </div>
         </div>
     </div>
