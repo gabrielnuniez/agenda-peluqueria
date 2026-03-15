@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let fechaSeleccionada = "";
     let indiceEdicion = -1;
 
-    // Configuración de Supabase
     const SUPABASE_URL = 'https://neyvklveqledlurvpcmr.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5leXZrbHZlcWxlZGx1cnZwY21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MzQ3NjYsImV4cCI6MjA4OTExMDc2Nn0.JVlEPagEGj-Tz7jY5OvrozXvjXA41CPkb0wxgJVrWRE';
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -26,12 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 registros = [...localesLimpios, ...registrosNube];
                 renderizar();
             }
-        } catch (err) { console.error("Error sincronización:", err); }
+        } catch (err) { console.error(err); }
     }
 
     window.renderizar = () => {
         contenedor.innerHTML = '';
-        const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        const meses = ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"];
         displayMes.innerText = `${meses[mesActual]} ${añoActual}`;
 
         const primerDia = new Date(añoActual, mesActual, 1).getDay();
@@ -55,10 +54,9 @@ document.addEventListener('DOMContentLoaded', () => {
             diaDiv.innerHTML = `<span class="day-number">${dia}</span>`;
             const list = document.createElement('div');
             
-            regDia.slice(0, 4).forEach(r => {
+            regDia.slice(0, 3).forEach(r => {
                 const dot = document.createElement('div');
-                let clase = r.tipo === 'gasto' ? 'danger' : (r.esNube ? 'evening' : 'morning');
-                dot.className = `event ${clase}`;
+                dot.className = `event ${r.tipo === 'gasto' ? 'danger' : 'morning'}`;
                 list.appendChild(dot);
             });
 
@@ -74,12 +72,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const regDia = registros.filter(r => r.fecha === fecha);
         document.getElementById('fechaDiaTitulo').innerText = fecha.split('-').reverse().join('/');
         const lista = document.getElementById('listaTurnosDia');
-        lista.innerHTML = regDia.length ? '' : '<p style="text-align:center; opacity:0.3;">Sin registros</p>';
+        lista.innerHTML = regDia.length ? '' : '<p style="text-align:center; opacity:0.3; padding:20px;">Sin registros</p>';
         
         regDia.forEach((r, idx) => {
             const item = document.createElement('div');
-            item.style.cssText = "background:rgba(255,255,255,0.05); padding:10px; border-radius:10px; margin-bottom:5px; display:flex; justify-content:space-between;";
+            item.className = 'lista-dia-item';
             item.innerHTML = `<div><small>${r.hora}</small><br><b>${r.esNube ? '🤖' : '✂️'} ${r.titulo}</b></div><span>$${r.monto}</span>`;
+            if(!r.esNube) item.onclick = (e) => { e.stopPropagation(); prepararEdicion(registros.indexOf(r)); };
             lista.appendChild(item);
         });
         document.getElementById('modalDia').style.display = 'flex';
@@ -87,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.abrirFormularioNuevo = () => {
         window.cerrarModalDia();
+        indiceEdicion = -1;
         document.getElementById('modalTurno').style.display = 'flex';
     };
 
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             monto: document.getElementById('montoTurno').value,
             tipo: document.getElementById('tipoRegistro').value
         };
-        registros.push(dato);
+        if(indiceEdicion > -1) registros[indiceEdicion] = dato; else registros.push(dato);
         localStorage.setItem('pelu_datos_v6', JSON.stringify(registros.filter(r => !r.esNube)));
         window.cerrarModal();
         renderizar();
@@ -114,7 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('totalNeto').innerText = `$${ing - gas}`;
     }
 
-    // Navegación
     document.getElementById('prevMonth').onclick = () => { mesActual--; if(mesActual<0){mesActual=11; añoActual--;} renderizar(); };
     document.getElementById('nextMonth').onclick = () => { mesActual++; if(mesActual>11){mesActual=0; añoActual++;} renderizar(); };
     window.cerrarModalDia = () => document.getElementById('modalDia').style.display = 'none';

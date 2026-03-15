@@ -5,70 +5,77 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Peluquería Elite PRO</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
+
     <header class="banner">
         <div class="banner-bg"></div>
-        <h1 id="txtBannerDisplay">BARBERIA 4154</h1>
-        <div class="banner-controls">
-            <button onclick="window.irAHoy()">📅 Hoy</button>
+        <div class="banner-content">
+            <h1 id="txtBannerDisplay">BARBERIA 4154</h1>
+            <button class="btn-hoy-top" onclick="window.irAHoy()">📅 Hoy</button>
         </div>
     </header>
 
     <nav class="header-nav">
-        <button id="prevMonth" class="btn-nav"> < </button>
-        <h2 id="monthYear">MES AÑO</h2>
-        <button id="nextMonth" class="btn-nav"> > </button>
+        <button id="prevMonth" class="btn-nav-circle"><span>&#10094;</span></button>
+        <h2 id="monthYear">MARZO 2026</h2>
+        <button id="nextMonth" class="btn-nav-circle"><span>&#10095;</span></button>
     </nav>
 
     <div class="weekdays-grid">
         <div>LU</div><div>MA</div><div>MI</div><div>JU</div><div>VI</div><div>SA</div><div>DO</div>
     </div>
 
-    <div id="calendar"></div>
+    <main id="calendar-container">
+        <div id="calendar"></div>
+    </main>
 
     <footer id="footer-summary">
         <div class="stat-box">
             <span class="stat-label">Ingresos</span>
-            <span id="totalIngresos" class="stat-value" style="color:#B2F2BB">$ 0</span>
+            <span id="totalIngresos" class="stat-value" style="color: #B2F2BB;">$ 0</span>
         </div>
         <div class="stat-box">
             <span class="stat-label">Gastos</span>
-            <span id="totalGastos" class="stat-value" style="color:#F2B8B5">$ 0</span>
+            <span id="totalGastos" class="stat-value" style="color: #F2B8B5;">$ 0</span>
         </div>
-        <div class="stat-box">
+        <div class="stat-box destacado">
             <span class="stat-label">Neto</span>
-            <span id="totalNeto" class="stat-value" style="color:white">$ 0</span>
+            <span id="totalNeto" class="stat-value">$ 0</span>
         </div>
     </footer>
 
     <div id="modalDia" class="modal">
-        <div class="modal-content">
+        <div class="modal-content card-material">
             <div class="modal-handle"></div>
-            <h2 id="fechaDiaTitulo"></h2>
-            <button class="btn-confirm" style="width:100%; margin-bottom:15px;" onclick="window.abrirFormularioNuevo()">+ NUEVO REGISTRO</button>
-            <div id="listaTurnosDia"></div>
-            <button class="btn-cancel" style="width:100%" onclick="window.cerrarModalDia()">CERRAR</button>
+            <h2 id="fechaDiaTitulo" class="modal-date-title">--/--/----</h2>
+            <button class="btn-primary-full" onclick="window.abrirFormularioNuevo()">+ Agregar</button>
+            <div id="listaTurnosDia" class="scroll-area"></div>
+            <button class="btn-text-only" onclick="window.cerrarModalDia()">CERRAR</button>
         </div>
     </div>
 
     <div id="modalTurno" class="modal">
-        <div class="modal-content">
+        <div class="modal-content card-material">
             <div class="modal-handle"></div>
             <h2 id="modalTitle">Nuevo Registro</h2>
-            <input type="text" id="nombreCliente" placeholder="Nombre">
-            <input type="time" id="horaTurno">
-            <input type="number" id="montoTurno" placeholder="Monto $">
-            <select id="tipoRegistro">
-                <option value="ingreso">✂️ Turno</option>
-                <option value="gasto">💸 Gasto</option>
-            </select>
-            <div class="modal-btns">
-                <button class="btn-confirm" id="btnGuardar">GUARDAR</button>
-                <button class="btn-delete" id="btnBorrar">ELIMINAR</button>
-                <button class="btn-cancel" onclick="window.cerrarModal()">CANCELAR</button>
+            <div class="input-group">
+                <input type="text" id="nombreCliente" placeholder="Nombre / Concepto">
+                <div class="row-inputs">
+                    <input type="time" id="horaTurno">
+                    <input type="number" id="montoTurno" placeholder="Monto $">
+                </div>
+                <select id="tipoRegistro">
+                    <option value="ingreso">✂️ Turno (Ingreso)</option>
+                    <option value="gasto">💸 Gasto (Egreso)</option>
+                </select>
+            </div>
+            <div class="modal-btns-vertical">
+                <button class="btn-primary-full" id="btnGuardar">GUARDAR</button>
+                <button class="btn-danger-link" id="btnBorrar" style="display:none;">ELIMINAR</button>
+                <button class="btn-text-only" onclick="window.cerrarModal()">CANCELAR</button>
             </div>
         </div>
     </div>
