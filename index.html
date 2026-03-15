@@ -12,6 +12,8 @@
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2793/2793765.png">
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -54,79 +56,39 @@
         </div>
     </footer>
 
-    <div id="modalDia" class="modal">
-        <div class="modal-content">
-            <div class="modal-handle"></div> 
-            <h2 id="fechaDiaTitulo">--/--/----</h2>
-            
-            <div class="btn-nuevo-dia" onclick="window.abrirFormularioNuevo()">
-                + Agregar Registro
-            </div>
-            
-            <div id="listaTurnosDia" class="lista-dia-scroll"></div>
-
-            <div class="modal-btns">
-                <button class="btn-cancel" onclick="window.cerrarModalDia()">CERRAR</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modalTurno" class="modal">
-        <div class="modal-content">
-            <div class="modal-handle"></div>
-            <h2 id="modalTitle">Nuevo Registro</h2>
-            
-            <div class="input-group">
-                <label>Nombre o Concepto</label>
-                <input type="text" id="nombreCliente" placeholder="Ej: Corte Degradé">
-            </div>
-            
-            <div class="input-row">
-                <div class="input-group">
-                    <label>Hora</label>
-                    <input type="time" id="horaTurno">
-                </div>
-                <div class="input-group">
-                    <label>Monto ($)</label>
-                    <input type="number" id="montoTurno" placeholder="0">
-                </div>
-            </div>
-            
-            <div class="input-group">
-                <label>Tipo de movimiento</label>
-                <select id="tipoRegistro">
-                    <option value="ingreso">✂️ Turno (Ingreso)</option>
-                    <option value="gasto">💸 Gasto (Egreso)</option>
-                </select>
-            </div>
-            
-            <div class="modal-btns">
-                <button class="btn-confirm" id="btnGuardar">GUARDAR CAMBIOS</button>
-                <button class="btn-delete" id="btnBorrar" style="display:none;">ELIMINAR PERMANENTE</button>
-                <button class="btn-cancel" onclick="window.cerrarModal()">DESCARTAR</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modalConfig" class="modal">
-        <div class="modal-content">
-            <div class="modal-handle"></div>
-            <h2>Ajustes de Perfil</h2>
-            <div class="input-group">
-                <label>Nombre del Negocio</label>
-                <input type="text" id="configNombre">
-            </div>
-            <div class="input-group">
-                <label>Foto de Portada (Banner)</label>
-                <input type="file" id="configFoto" accept="image/*">
-            </div>
-            <div class="modal-btns">
-                <button class="btn-confirm" onclick="window.guardarConfig()">GUARDAR CONFIGURACIÓN</button>
-                <button class="btn-cancel" onclick="window.cerrarConfig()">VOLVER</button>
-            </div>
-        </div>
-    </div>
-
     <script src="script.js"></script>
+    
+    <script>
+        // --- CONEXIÓN DIRECTA CON EL BOT ---
+        const SUPABASE_URL = 'https://neyvklveqledlurvpcmr.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5leXZrbHZlcWxlZGx1cnZwY21yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MzQ3NjYsImV4cCI6MjA4OTExMDc2Nn0.JVlEPagEGj-Tz7jY5OvrozXvjXA41CPkb0wxgJVrWRE';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function sincronizarConBot() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('turnos')
+                    .select('*')
+                    .eq('barberia_id', 'barberia_41545');
+
+                if (error) throw error;
+
+                console.log("Datos recibidos del bot:", data);
+                
+                // Si tu script.js tiene una función para redibujar el calendario, 
+                // aquí deberíamos llamarla pasando los 'data'.
+                if(typeof window.actualizarInterfaz === 'function'){
+                    window.actualizarInterfaz(data);
+                }
+
+            } catch (err) {
+                console.error("Error de sincronización:", err);
+            }
+        }
+
+        // Ejecutar sincronización cada 10 segundos
+        setInterval(sincronizarConBot, 10000);
+        sincronizarConBot();
+    </script>
 </body>
 </html>
