@@ -203,13 +203,13 @@ body {
 
 /* 1. FIJAMOS LA ALTURA DE LA CELDA */
 .day {
-    height: 90px; /* Cambiamos min-height por height fijo */
+    height: 90px;
     background: var(--md-sys-color-surface);
     padding: 4px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    overflow: hidden; /* Nada sale de sus bordes */
+    overflow: hidden;
 }
 
 /* 2. CREAMOS EL SCROLL INVISIBLE PARA LOS EVENTOS (PUNTITOS) */
@@ -217,25 +217,23 @@ body {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 2px; /* Separación entre líneas */
-    overflow-y: auto; /* Activa el scroll vertical */
-    flex-grow: 1; /* Ocupa el espacio sobrante */
+    gap: 2px;
+    overflow-y: auto;
+    flex-grow: 1;
 }
 
-/* Ocultamos la barra de scroll de la celda para que se vea estético, pero el dedo sigue scrolleando */
 .day-events::-webkit-scrollbar {
     display: none;
 }
 
 /* 3. ASEGURAMOS EL SCROLL EN EL MODAL DE TURNOS (BOTTOM SHEET) */
 .scroll-area {
-    max-height: 50vh; /* Ocupa máximo el 50% de la pantalla */
-    overflow-y: auto; /* Activa el scroll vertical */
+    max-height: 50vh;
+    overflow-y: auto;
     padding-right: 4px;
     margin-bottom: 16px;
 }
 
-/* A este scroll del modal sí le damos un diseño sutil */
 .scroll-area::-webkit-scrollbar {
     width: 4px;
 }
@@ -254,7 +252,7 @@ body {
 .event-ingreso { background-color: #81C784; } /* Verde suave */
 .event-gasto { background-color: var(--md-sys-color-error); }
 
-/* --- FOOTER RESUMEN (Ahora es un panel flotante) --- */
+/* --- FOOTER RESUMEN --- */
 #footer-summary {
     position: fixed;
     bottom: 96px; /* Justo arriba del Bottom Nav */
@@ -323,10 +321,10 @@ body {
     display: none;
     z-index: 2000;
     justify-content: center;
-    align-items: flex-end; /* Bottom Sheet por defecto */
+    align-items: flex-end;
 }
 
-.md-dialog { align-items: center; } /* Dialog centrado */
+.md-dialog { align-items: center; }
 
 .sheet-backdrop, .dialog-backdrop {
     position: absolute;
@@ -408,7 +406,7 @@ body {
     border-color: var(--md-sys-color-primary);
     border-width: 2px;
     outline: none;
-    padding-left: 47px; /* Compensar borde */
+    padding-left: 47px;
 }
 
 .md-field label {
@@ -518,3 +516,23 @@ body {
 .chart-container { position: relative; height: 250px; width: 100%; }
 .file-upload-wrapper { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
 .upload-label { font-size: 12px; color: var(--md-sys-color-on-surface-variant); }
+
+/* --- BOTÓN WHATSAPP --- */
+.wsp-btn {
+    background-color: #25D366;
+    color: #111;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: transform 0.2s;
+}
+.wsp-btn:active {
+    transform: scale(0.9);
+}
+.wsp-btn span {
+    font-size: 20px;
+}

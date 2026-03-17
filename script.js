@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const primerDia = new Date(añoActual, mesActual, 1).getDay();
             const totalDias = new Date(añoActual, mesActual + 1, 0).getDate();
             
-            // Adaptar para que la semana empiece en Domingo (0) o Lunes (1). Aquí usamos Domingo como 0.
+            // Adaptar para que la semana empiece en Domingo (0)
             for (let i = 0; i < primerDia; i++) {
                 contenedor.appendChild(Object.assign(document.createElement('div'), {className: 'day empty'}));
             }
@@ -74,10 +74,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 diaDiv.innerHTML = `<span class="day-number">${dia}</span>`;
                 const list = document.createElement('div');
-                list.className = 'day-events'; // Le damos una clase específica para el CSS
+                list.className = 'day-events'; 
                 list.style.width = '100%';
                 
-                // Sacamos el .slice(0, 4) para que cargue todos los turnos del día
+                // Mostrar todos los turnos del día
                 regDia.sort((a,b) => (a.hora > b.hora ? 1 : -1)).forEach(r => {
                     const dot = document.createElement('div');
                     dot.className = `event-indicator ${r.tipo === 'gasto' ? 'event-gasto' : 'event-ingreso'}`;
@@ -118,49 +118,59 @@ document.addEventListener('DOMContentLoaded', () => {
     window.irAHoy = () => { 
         mesActual = hoyReal.getMonth(); 
         añoActual = hoyReal.getFullYear(); 
-        window.cambiarVista('calendario'); // Asegura volver a la vista calendario
+        window.cambiarVista('calendario'); 
         renderizar(); 
     };
 
     // --- 4. CONTROL DE VISTAS (SPA) ---
     window.cambiarVista = (vistaId) => {
-        // Ocultar todas las vistas
         document.querySelectorAll('.vista').forEach(v => v.classList.remove('activa'));
-        // Quitar estado activo de los botones de navegación
         document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
         
-        // Mostrar vista seleccionada
         document.getElementById(`vista-${vistaId}`).classList.add('activa');
         event.currentTarget.classList.add('active');
 
-        // Si entramos a reportes, cargar el gráfico por defecto (mensual)
         if (vistaId === 'reportes') {
             window.filtrarGrafico('mensual');
         }
     };
 
-    // --- 5. LÓGICA DE MODALES (M3) ---
+    // --- 5. LÓGICA DE MODALES (M3) Y WHATSAPP ---
     window.abrirModalDia = (fecha) => {
         fechaSeleccionada = fecha;
         const regDia = registros.filter(r => r.fecha === fecha);
-        document.getElementById('fechaDiaTitulo').innerText = fecha.split('-').reverse().join('/');
+        const fechaFormateada = fecha.split('-').reverse().join('/');
+        document.getElementById('fechaDiaTitulo').innerText = fechaFormateada;
+        
         const lista = document.getElementById('listaTurnosDia');
         lista.innerHTML = regDia.length ? '' : '<p style="text-align:center; opacity:0.5; padding:20px;">Sin registros hoy</p>';
         
         regDia.forEach(r => {
             const item = document.createElement('div');
-            item.className = 'md-card'; // Reutilizamos clase del CSS
+            item.className = 'md-card'; 
             item.style.margin = '0 0 8px 0';
             item.style.padding = '12px';
             item.style.display = 'flex';
             item.style.justifyContent = 'space-between';
             item.style.alignItems = 'center';
+            
+            // Lógica Botón WhatsApp
+            let btnWsp = '';
+            if (r.tipo === 'ingreso' && r.telefono) {
+                const telLimpio = r.telefono.replace(/\D/g, ''); 
+                const mensaje = encodeURIComponent(`Hola ${r.titulo}, te escribimos de ${configBanner.titulo} para recordarte tu turno el día ${fechaFormateada} a las ${r.hora}. ¡Te esperamos!`);
+                btnWsp = `<a href="https://wa.me/${telLimpio}?text=${mensaje}" target="_blank" class="wsp-btn" onclick="event.stopPropagation()"><span class="material-symbols-rounded" style="color: white;">chat</span></a>`;
+            }
+
             item.innerHTML = `
-                <div>
+                <div style="flex-grow: 1;">
                     <span style="font-size:12px; opacity:0.7;">${r.hora || '--:--'}</span><br>
                     <b style="font-size:16px;">${r.titulo}</b>
                 </div>
-                <span style="font-weight:800; font-size:18px; color:${r.tipo==='gasto'?'#FFB4AB':'#81C784'}">$${r.monto}</span>
+                <div style="display:flex; align-items:center; gap: 12px;">
+                    ${btnWsp}
+                    <span style="font-weight:800; font-size:18px; color:${r.tipo==='gasto'?'#FFB4AB':'#81C784'}">$${r.monto}</span>
+                </div>
             `;
             item.onclick = (e) => { e.stopPropagation(); window.prepararEdicion(registros.indexOf(r)); };
             lista.appendChild(item);
@@ -168,19 +178,18 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('modalDia').classList.add('show');
     };
 
-    window.abrirFormularioNuevo = () => {
-        window.cerrarModalDia();
-        indiceEdicion = -1;
-        // Si no seleccionó fecha, usa hoy
-        if(!fechaSeleccionada) {
+    window.abrirFormularioNuevo = (desdeModalDia = false) => {
+        if (!desdeModalDia) {
+            window.cerrarModalDia();
             fechaSeleccionada = `${hoyReal.getFullYear()}-${String(hoyReal.getMonth() + 1).padStart(2, '0')}-${String(hoyReal.getDate()).padStart(2, '0')}`;
         }
         
+        indiceEdicion = -1;
         document.getElementById('modalTitle').innerText = "Nuevo Registro";
         document.getElementById('nombreCliente').value = "";
+        document.getElementById('telefonoCliente').value = "";
         document.getElementById('montoTurno').value = "";
         
-        // Hora actual por defecto
         const ahora = new Date();
         document.getElementById('horaTurno').value = `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`;
         
@@ -195,6 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
         indiceEdicion = idx;
         document.getElementById('modalTitle').innerText = "Editar Registro";
         document.getElementById('nombreCliente').value = r.titulo;
+        document.getElementById('telefonoCliente').value = r.telefono || "";
         document.getElementById('horaTurno').value = r.hora || "";
         document.getElementById('montoTurno').value = r.monto;
         document.querySelector(`input[name="tipoRegistro"][value="${r.tipo}"]`).checked = true;
@@ -215,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.guardarConfig = () => {
         configBanner.titulo = document.getElementById('cfgTitulo').value || "BARBERÍA 4154";
-        configBanner.fondo = tempImageBase64; // Guarda la imagen subida o la anterior
+        configBanner.fondo = tempImageBase64; 
         localStorage.setItem('pelu_config_v2', JSON.stringify(configBanner));
         aplicarConfigVisual();
         window.cerrarConfig();
@@ -230,6 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const dato = {
             fecha: fechaSeleccionada,
             titulo: titulo,
+            telefono: document.getElementById('telefonoCliente').value,
             hora: document.getElementById('horaTurno').value,
             monto: Number(monto),
             tipo: document.querySelector('input[name="tipoRegistro"]:checked').value
@@ -264,17 +275,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.filtrarGrafico = (periodo) => {
-        // Actualizar chips visuales
         document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-        if(event) event.target.classList.add('active');
+        if(event && event.target) event.target.classList.add('active');
 
         let etiquetas = [];
         let datosIngresos = [];
         let datosGastos = [];
 
-        // Procesar datos según filtro
         if (periodo === 'mensual') {
-            // Últimos 6 meses
             for (let i = 5; i >= 0; i--) {
                 let d = new Date(hoyReal.getFullYear(), hoyReal.getMonth() - i, 1);
                 let mesStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2,'0')}`;
@@ -286,7 +294,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 datosGastos.push(reg.filter(r => r.tipo === 'gasto').reduce((sum, r) => sum + r.monto, 0));
             }
         } else if (periodo === 'diario') {
-            // Últimos 7 días
             for (let i = 6; i >= 0; i--) {
                 let d = new Date();
                 d.setDate(d.getDate() - i);
@@ -298,7 +305,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 datosGastos.push(reg.filter(r => r.tipo === 'gasto').reduce((sum, r) => sum + r.monto, 0));
             }
         } else if (periodo === 'anual') {
-            // Últimos 3 años
             for (let i = 2; i >= 0; i--) {
                 let y = hoyReal.getFullYear() - i;
                 etiquetas.push(y);

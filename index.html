@@ -9,12 +9,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1C1B1F">
+    <meta name="theme-color" content="#1C1B1F">
 </head>
 <body>
 
@@ -78,7 +77,7 @@
                 </div>
             </footer>
 
-            <button class="md-fab" onclick="window.abrirFormularioNuevo()" aria-label="Nuevo Registro">
+            <button class="md-fab" onclick="window.abrirFormularioNuevo(false)" aria-label="Nuevo Registro">
                 <span class="material-symbols-rounded">add</span>
             </button>
         </section>
@@ -106,6 +105,11 @@
         <div class="sheet-content md-surface">
             <div class="drag-handle"></div>
             <h2 id="fechaDiaTitulo" class="sheet-title">--/--/----</h2>
+            
+            <button class="md-btn btn-filled" style="width: 100%; margin-bottom: 16px; padding: 16px; border-radius: 16px;" onclick="window.abrirFormularioNuevo(true)">
+                <span class="material-symbols-rounded" style="vertical-align: middle; margin-right: 8px;">add_circle</span> NUEVO REGISTRO AQUÍ
+            </button>
+
             <div id="listaTurnosDia" class="scroll-area list-group"></div>
             <button class="md-btn btn-text" onclick="window.cerrarModalDia()">CERRAR</button>
         </div>
@@ -135,6 +139,11 @@
                 <div class="md-field">
                     <input type="text" id="nombreCliente" required placeholder=" ">
                     <label>Concepto / Cliente</label>
+                </div>
+
+                <div class="md-field">
+                    <input type="tel" id="telefonoCliente" placeholder=" ">
+                    <label>Teléfono (Opcional - WhatsApp)</label>
                 </div>
 
                 <div class="row-inputs">
