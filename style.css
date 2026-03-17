@@ -1,38 +1,52 @@
 /* --- VARIABLES MATERIAL DESIGN 3 --- */
 :root {
-    --md-surface: #1C1B1F;
-    --md-on-surface: #E6E1E5;
-    --md-primary: #D0BCFF;
-    --md-on-primary: #381E72;
-    --md-secondary-container: #4A4458;
-    --md-outline: #938F99;
+    /* Paleta de Colores Modo Oscuro (M3) */
+    --md-sys-color-background: #1C1B1F;
+    --md-sys-color-on-background: #E6E1E5;
     
-    /* Colores por Horario y Estados */
-    --morning: #D0BCFF;   /* Violeta */
-    --afternoon: #03DAC6; /* Cian */
-    --evening: #FFB74D;   /* Naranja */
-    --danger: #F2B8B5;    /* Rojo suave */
+    --md-sys-color-surface: #1C1B1F;
+    --md-sys-color-surface-container: #25232A;
+    --md-sys-color-surface-container-high: #2B2930;
+    --md-sys-color-on-surface: #E6E1E5;
+    --md-sys-color-on-surface-variant: #CAC4D0;
+    
+    --md-sys-color-primary: #D0BCFF;
+    --md-sys-color-on-primary: #381E72;
+    --md-sys-color-primary-container: #4F378B;
+    
+    --md-sys-color-error: #FFB4AB;
+    --md-sys-color-on-error: #690005;
+    --md-sys-color-error-container: #93000A;
+    
+    /* Variables de UI */
+    --md-sys-elevation-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.15), 0px 1px 2px 0px rgba(0, 0, 0, 0.30);
+    --md-sys-elevation-3: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px 0px rgba(0, 0, 0, 0.30);
+    --transition-standard: 200ms cubic-bezier(0.2, 0, 0, 1);
 }
 
 /* --- ESTILOS GENERALES --- */
 body {
-    background-color: var(--md-surface);
-    color: var(--md-on-surface);
-    font-family: 'Inter', sans-serif;
+    background-color: var(--md-sys-color-background);
+    color: var(--md-sys-color-on-background);
+    font-family: 'Roboto', sans-serif;
     margin: 0;
-    padding-bottom: 110px;
+    padding-bottom: 80px; /* Espacio para el Bottom Nav */
     overflow-x: hidden;
     -webkit-tap-highlight-color: transparent;
 }
 
-/* --- BANNER --- */
-.banner {
-    height: 160px;
+/* --- BANNER PRINCIPAL --- */
+.md-banner {
     position: relative;
+    height: 180px;
     display: flex;
     align-items: flex-end;
-    padding: 20px;
+    padding: 24px;
     box-sizing: border-box;
+    overflow: hidden;
+    border-bottom-left-radius: 24px;
+    border-bottom-right-radius: 24px;
+    box-shadow: var(--md-sys-elevation-1);
 }
 
 .banner-bg {
@@ -40,162 +54,467 @@ body {
     top: 0; left: 0; width: 100%; height: 100%;
     background-size: cover;
     background-position: center;
-    filter: brightness(0.5);
-    z-index: -1;
-    transition: background-image 0.5s ease;
+    transition: background-image 0.3s ease;
+    z-index: 0;
+}
+
+.banner-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(to top, rgba(28, 27, 31, 1) 0%, rgba(28, 27, 31, 0) 100%);
+    z-index: 1;
 }
 
 .banner-content {
+    position: relative;
+    z-index: 2;
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.banner h1 {
-    font-size: 22px;
-    font-weight: 800;
+.md-title {
+    font-size: 28px;
+    font-weight: 700;
     margin: 0;
     letter-spacing: -0.5px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
-.banner-actions { display: flex; gap: 10px; align-items: center; }
-
-.btn-icon {
-    background: rgba(255,255,255,0.15);
-    border: none; color: white;
-    width: 42px; height: 42px; border-radius: 12px;
-    cursor: pointer; font-size: 20px;
-    backdrop-filter: blur(10px);
-    display: flex; align-items: center; justify-content: center;
+.md-icon-btn {
+    background: transparent;
+    border: none;
+    color: var(--md-sys-color-on-surface);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color var(--transition-standard);
 }
 
-.btn-hoy-top {
-    background: rgba(255,255,255,0.15);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: white; padding: 8px 16px; border-radius: 12px;
-    font-size: 14px; font-weight: 600;
-    backdrop-filter: blur(10px);
+.md-icon-btn:active {
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* --- NAVEGACIÓN MENSUAL --- */
+/* --- NAVEGACIÓN INFERIOR (BOTTOM NAV) --- */
+.md-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 80px;
+    background-color: var(--md-sys-color-surface-container);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 100;
+    box-shadow: 0px -1px 4px rgba(0,0,0,0.2);
+}
+
+.nav-item {
+    background: transparent;
+    border: none;
+    color: var(--md-sys-color-on-surface-variant);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: color var(--transition-standard);
+    min-width: 64px;
+}
+
+.nav-item span.material-symbols-rounded {
+    font-size: 24px;
+    padding: 4px 16px;
+    border-radius: 16px;
+    transition: background-color var(--transition-standard);
+}
+
+.nav-item span:last-child {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.nav-item.active {
+    color: var(--md-sys-color-on-surface);
+}
+
+.nav-item.active span.material-symbols-rounded {
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary);
+}
+
+/* --- VISTAS (SPA) --- */
+.vista {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.vista.activa {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- CALENDARIO --- */
 .header-nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 20px;
+    padding: 16px 24px;
 }
 
-.btn-nav-circle {
-    background: #2b2930;
-    border: none; color: white;
-    width: 44px; height: 44px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
+.mes-titulo {
+    font-size: 20px;
+    font-weight: 500;
+    margin: 0;
+    text-transform: capitalize;
 }
 
-#monthYear { font-size: 18px; font-weight: 700; margin: 0; text-transform: capitalize; }
-
-/* --- GRID DEL CALENDARIO --- */
 .weekdays-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     text-align: center;
-    font-size: 11px; font-weight: 700; opacity: 0.5; padding: 10px 0;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface-variant);
+    padding: 0 16px 8px;
+}
+
+#calendar-container {
+    padding: 0 16px 100px; /* Espacio para el footer y FAB */
 }
 
 #calendar {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 1px;
-    background: rgba(255,255,255,0.05);
-    transition: opacity 0.3s ease-in-out, transform 0.3s ease-out;
-    opacity: 1;
+    gap: 2px;
+    background: var(--md-sys-color-surface-container-high);
+    border-radius: 16px;
+    overflow: hidden;
 }
 
-.fade-out { opacity: 0; transform: translateY(10px); }
-
+/* 1. FIJAMOS LA ALTURA DE LA CELDA */
 .day {
-    min-height: 95px;
-    background: var(--md-surface);
-    padding: 8px;
-    border: 0.5px solid rgba(255,255,255,0.02);
-    position: relative; box-sizing: border-box;
+    height: 90px; /* Cambiamos min-height por height fijo */
+    background: var(--md-sys-color-surface);
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden; /* Nada sale de sus bordes */
 }
 
-.day.today {
-    background: rgba(208, 188, 255, 0.05);
-    box-shadow: inset 0 0 0 1px var(--md-primary);
-}
-
-.day.empty { background: #161519; }
-
-/* --- LÍNEAS DE EVENTOS --- */
-.event { height: 3px; border-radius: 2px; margin-top: 2px; width: 100%; }
-.morning-bg { background-color: var(--morning); }
-.afternoon-bg { background-color: var(--afternoon); }
-.evening-bg { background-color: var(--evening); }
-.danger-bg { background-color: var(--danger); }
-
-/* --- MODALES --- */
-.modal {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.85);
-    display: none; align-items: flex-end; z-index: 2000;
-    backdrop-filter: blur(4px);
-    transition: all 0.3s ease;
-}
-
-.card-material {
-    background: #25232a;
+/* 2. CREAMOS EL SCROLL INVISIBLE PARA LOS EVENTOS (PUNTITOS) */
+.day-events {
     width: 100%;
-    border-radius: 28px 28px 0 0;
-    padding: 24px; box-sizing: border-box;
-    max-height: 90vh; overflow-y: auto;
-    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 2px; /* Separación entre líneas */
+    overflow-y: auto; /* Activa el scroll vertical */
+    flex-grow: 1; /* Ocupa el espacio sobrante */
 }
 
-@keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
+/* Ocultamos la barra de scroll de la celda para que se vea estético, pero el dedo sigue scrolleando */
+.day-events::-webkit-scrollbar {
+    display: none;
 }
 
-.modal-handle {
-    width: 32px; height: 4px; background: #938F99;
-    margin: 0 auto 20px; border-radius: 2px;
+/* 3. ASEGURAMOS EL SCROLL EN EL MODAL DE TURNOS (BOTTOM SHEET) */
+.scroll-area {
+    max-height: 50vh; /* Ocupa máximo el 50% de la pantalla */
+    overflow-y: auto; /* Activa el scroll vertical */
+    padding-right: 4px;
+    margin-bottom: 16px;
 }
 
-/* --- INPUTS Y BOTONES --- */
-input, select {
-    width: 100%; padding: 16px; margin-bottom: 12px;
-    background: #1C1B1F; border: 1px solid var(--md-outline);
-    border-radius: 12px; color: white; font-size: 16px; box-sizing: border-box;
+/* A este scroll del modal sí le damos un diseño sutil */
+.scroll-area::-webkit-scrollbar {
+    width: 4px;
+}
+.scroll-area::-webkit-scrollbar-thumb {
+    background: var(--md-sys-color-surface-container-high);
+    border-radius: 4px;
 }
 
-.btn-primary-full {
-    background: var(--md-primary); color: var(--md-on-primary);
-    width: 100%; padding: 16px; border-radius: 100px;
-    border: none; font-weight: 700; font-size: 16px; cursor: pointer; margin: 10px 0;
+/* Indicadores de Eventos */
+.event-indicator {
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    margin-top: 2px;
 }
+.event-ingreso { background-color: #81C784; } /* Verde suave */
+.event-gasto { background-color: var(--md-sys-color-error); }
 
-.btn-danger-full {
-    background: #442B2B; color: #F2B8B5;
-    width: 100%; padding: 16px; border-radius: 100px;
-    border: 1px solid #603D3D; font-weight: 700; cursor: pointer; margin-top: 10px;
-}
-
-.btn-text-only {
-    background: transparent; color: var(--md-primary);
-    border: none; width: 100%; padding: 15px; font-weight: 600; cursor: pointer;
-}
-
-/* --- FOOTER --- */
+/* --- FOOTER RESUMEN (Ahora es un panel flotante) --- */
 #footer-summary {
-    position: fixed; bottom: 0; width: 100%;
-    background: #25232a; display: flex; justify-content: space-around;
-    padding: 15px 0; border-top: 1px solid rgba(255,255,255,0.1); z-index: 1000;
+    position: fixed;
+    bottom: 96px; /* Justo arriba del Bottom Nav */
+    left: 16px;
+    right: 16px;
+    background: var(--md-sys-color-surface-container-high);
+    border-radius: 16px;
+    display: flex;
+    justify-content: space-around;
+    padding: 16px 0;
+    box-shadow: var(--md-sys-elevation-3);
+    z-index: 90;
 }
 
-.stat-box { text-align: center; }
-.stat-value { font-size: 18px; font-weight: 800; }
+.stat-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 16px;
+    font-weight: 700;
+}
+.text-green { color: #81C784; }
+.text-red { color: var(--md-sys-color-error); }
+.text-primary { color: var(--md-sys-color-primary); }
+
+/* --- BOTÓN FLOTANTE (FAB) --- */
+.md-fab {
+    position: fixed;
+    bottom: 180px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary);
+    border: none;
+    box-shadow: var(--md-sys-elevation-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 95;
+    transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s;
+}
+
+.md-fab:active {
+    transform: scale(0.95);
+    box-shadow: var(--md-sys-elevation-1);
+}
+
+.md-fab span { font-size: 28px; }
+
+/* --- MODALES (BOTTOM SHEETS Y DIALOGS) --- */
+.md-bottom-sheet, .md-dialog {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    display: none;
+    z-index: 2000;
+    justify-content: center;
+    align-items: flex-end; /* Bottom Sheet por defecto */
+}
+
+.md-dialog { align-items: center; } /* Dialog centrado */
+
+.sheet-backdrop, .dialog-backdrop {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity var(--transition-standard);
+}
+
+.sheet-content, .dialog-content {
+    background: var(--md-sys-color-surface-container-high);
+    width: 100%;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.sheet-content {
+    border-radius: 28px 28px 0 0;
+    padding: 16px 24px 32px;
+    max-height: 90vh;
+    transform: translateY(100%);
+    transition: transform var(--transition-standard);
+}
+
+.dialog-content {
+    width: 90%;
+    max-width: 400px;
+    border-radius: 28px;
+    padding: 24px;
+    transform: scale(0.9) translateY(20px);
+    opacity: 0;
+    transition: all var(--transition-standard);
+}
+
+/* Clases activas para animación */
+.md-bottom-sheet.show, .md-dialog.show { display: flex; }
+.md-bottom-sheet.show .sheet-backdrop, .md-dialog.show .dialog-backdrop { opacity: 1; }
+.md-bottom-sheet.show .sheet-content { transform: translateY(0); }
+.md-dialog.show .dialog-content { transform: scale(1) translateY(0); opacity: 1; }
+
+.drag-handle {
+    width: 32px; height: 4px;
+    background: var(--md-sys-color-on-surface-variant);
+    opacity: 0.4;
+    margin: 0 auto 24px;
+    border-radius: 2px;
+}
+
+.sheet-title, .dialog-title {
+    font-size: 24px;
+    font-weight: 400;
+    margin: 0 0 24px 0;
+}
+
+/* --- FORMULARIOS E INPUTS --- */
+.md-input-group { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+.row-inputs { display: flex; gap: 12px; }
+
+.md-field {
+    position: relative;
+    width: 100%;
+}
+
+.md-field input {
+    width: 100%;
+    padding: 16px 16px 16px 48px;
+    background: var(--md-sys-color-surface-container);
+    border: 1px solid var(--md-sys-color-on-surface-variant);
+    border-radius: 4px;
+    color: var(--md-sys-color-on-surface);
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.md-field input:focus {
+    border-color: var(--md-sys-color-primary);
+    border-width: 2px;
+    outline: none;
+    padding-left: 47px; /* Compensar borde */
+}
+
+.md-field label {
+    position: absolute;
+    left: 48px;
+    top: 16px;
+    color: var(--md-sys-color-on-surface-variant);
+    transition: 0.2s ease all;
+    pointer-events: none;
+}
+
+.md-field input:focus ~ label,
+.md-field input:not(:placeholder-shown) ~ label {
+    top: -8px;
+    left: 12px;
+    font-size: 12px;
+    background: var(--md-sys-color-surface-container-high);
+    padding: 0 4px;
+    color: var(--md-sys-color-primary);
+}
+
+/* --- BOTONES DE DIÁLOGO --- */
+.dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+.flex-spacer { flex-grow: 1; }
+
+.md-btn {
+    padding: 10px 24px;
+    border-radius: 100px;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.2s;
+}
+
+.btn-text {
+    background: transparent;
+    color: var(--md-sys-color-primary);
+}
+.btn-text:active { background: rgba(208, 188, 255, 0.1); }
+.btn-text.error { color: var(--md-sys-color-error); }
+
+.btn-filled {
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+}
+
+.btn-outlined {
+    background: transparent;
+    border: 1px solid var(--md-sys-color-outline);
+    color: var(--md-sys-color-primary);
+    display: flex; align-items: center; gap: 8px;
+}
+
+/* --- CHIPS Y RADIOS --- */
+.tipo-selector { display: flex; gap: 8px; margin-bottom: 8px; }
+.md-radio { position: relative; cursor: pointer; }
+.md-radio input { display: none; }
+
+.radio-chip {
+    display: flex; align-items: center; gap: 4px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--md-sys-color-on-surface-variant);
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.md-radio input:checked + .radio-chip.ingreso {
+    background: rgba(129, 199, 132, 0.2);
+    border-color: #81C784; color: #81C784;
+}
+.md-radio input:checked + .radio-chip.gasto {
+    background: rgba(255, 180, 171, 0.2);
+    border-color: var(--md-sys-color-error); color: var(--md-sys-color-error);
+}
+
+/* --- VISTA REPORTES --- */
+.section-title { padding: 24px 24px 8px; margin: 0; font-size: 24px; font-weight: 400;}
+.md-card {
+    background: var(--md-sys-color-surface-container-high);
+    border-radius: 24px;
+    margin: 16px; padding: 20px;
+}
+
+.filtros-tiempo {
+    display: flex; gap: 8px; margin: 16px 0; overflow-x: auto; padding-bottom: 4px;
+}
+
+.chip {
+    background: var(--md-sys-color-surface-container);
+    color: var(--md-sys-color-on-surface);
+    border: none; padding: 8px 16px; border-radius: 8px;
+    font-size: 14px; cursor: pointer; white-space: nowrap;
+}
+
+.chip.active {
+    background: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary);
+}
+
+.chart-container { position: relative; height: 250px; width: 100%; }
+.file-upload-wrapper { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.upload-label { font-size: 12px; color: var(--md-sys-color-on-surface-variant); }

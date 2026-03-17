@@ -4,39 +4,50 @@ document.addEventListener('DOMContentLoaded', () => {
     let añoActual = hoyReal.getFullYear();
     let fechaSeleccionada = "";
     let indiceEdicion = -1;
+    let chartInstance = null; // Para el gráfico de estadísticas
 
     // --- VARIABLES PARA SWIPE ---
     let touchStartX = 0;
     let touchEndX = 0;
 
-    let configBanner = JSON.parse(localStorage.getItem('pelu_config_v1')) || {
-        titulo: "BARBERIA 4154",
+    let configBanner = JSON.parse(localStorage.getItem('pelu_config_v2')) || {
+        titulo: "BARBERÍA 4154",
         fondo: "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80"
     };
+    
+    // Variable temporal para la imagen subida
+    let tempImageBase64 = configBanner.fondo; 
 
+    // Mantenemos la misma llave de almacenamiento para no perder tus datos actuales
     let registros = JSON.parse(localStorage.getItem('pelu_datos_v6')) || [];
+    
     const contenedor = document.getElementById('calendar');
     const displayMes = document.getElementById('monthYear');
 
+    // --- 1. CONFIGURACIÓN VISUAL Y BANNER ---
     function aplicarConfigVisual() {
         document.getElementById('txtBannerDisplay').innerText = configBanner.titulo;
         document.getElementById('bannerBg').style.backgroundImage = `url('${configBanner.fondo}')`;
     }
 
-    // Lógica de colores por horario
-    function obtenerClaseColor(hora, tipo) {
-        if (tipo === 'gasto') return 'danger-bg';
-        if (!hora) return 'morning-bg';
-        const h = parseInt(hora.split(':')[0]);
-        if (h >= 6 && h < 13) return 'morning-bg';
-        if (h >= 13 && h < 19) return 'afternoon-bg';
-        return 'evening-bg';
-    }
+    // Lector de imagen desde galería local
+    const inputFondo = document.getElementById('cfgFondoFile');
+    inputFondo.addEventListener('change', function(e) {
+        const file = this.files[0];
+        if (file) {
+            document.getElementById('nombreArchivoFondo').innerText = file.name;
+            const reader = new FileReader();
+            reader.onload = function(evento) {
+                tempImageBase64 = evento.target.result; // Guarda la imagen en base64
+            };
+            reader.readAsDataURL(file);
+        }
+    });
 
-    // --- RENDERIZADO CON ANIMACIÓN SUAVE ---
+    // --- 2. RENDERIZADO DEL CALENDARIO (M3) ---
     window.renderizar = () => {
-        // Efecto de salida
-        contenedor.classList.add('fade-out');
+        contenedor.style.opacity = '0';
+        contenedor.style.transform = 'translateY(10px)';
 
         setTimeout(() => {
             contenedor.innerHTML = '';
@@ -45,9 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const primerDia = new Date(añoActual, mesActual, 1).getDay();
             const totalDias = new Date(añoActual, mesActual + 1, 0).getDate();
-            const desfase = (primerDia === 0 ? 6 : primerDia - 1);
-
-            for (let i = 0; i < desfase; i++) {
+            
+            // Adaptar para que la semana empiece en Domingo (0) o Lunes (1). Aquí usamos Domingo como 0.
+            for (let i = 0; i < primerDia; i++) {
                 contenedor.appendChild(Object.assign(document.createElement('div'), {className: 'day empty'}));
             }
 
@@ -57,14 +68,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const diaDiv = document.createElement('div');
                 diaDiv.className = 'day';
-                if(dia === hoyReal.getDate() && mesActual === hoyReal.getMonth() && añoActual === hoyReal.getFullYear()) diaDiv.classList.add('today');
+                if(dia === hoyReal.getDate() && mesActual === hoyReal.getMonth() && añoActual === hoyReal.getFullYear()) {
+                    diaDiv.classList.add('today');
+                }
 
                 diaDiv.innerHTML = `<span class="day-number">${dia}</span>`;
                 const list = document.createElement('div');
+                list.className = 'day-events'; // Le damos una clase específica para el CSS
+                list.style.width = '100%';
                 
-                regDia.sort((a,b) => (a.hora > b.hora ? 1 : -1)).slice(0, 4).forEach(r => {
+                // Sacamos el .slice(0, 4) para que cargue todos los turnos del día
+                regDia.sort((a,b) => (a.hora > b.hora ? 1 : -1)).forEach(r => {
                     const dot = document.createElement('div');
-                    dot.className = `event ${obtenerClaseColor(r.hora, r.tipo)}`;
+                    dot.className = `event-indicator ${r.tipo === 'gasto' ? 'event-gasto' : 'event-ingreso'}`;
                     list.appendChild(dot);
                 });
 
@@ -76,32 +92,18 @@ document.addEventListener('DOMContentLoaded', () => {
             aplicarConfigVisual();
             actualizarEconomia();
             
-            // Efecto de entrada
-            contenedor.classList.remove('fade-out');
-        }, 150); // Tiempo que dura la desaparición antes de cambiar los datos
+            contenedor.style.opacity = '1';
+            contenedor.style.transform = 'translateY(0)';
+        }, 200);
     };
 
-    // --- DETECCIÓN DE GESTOS (SWIPE) ---
-    contenedor.addEventListener('touchstart', e => {
-        touchStartX = e.changedTouches[0].screenX;
-    }, false);
-
+    // --- 3. NAVEGACIÓN Y SWIPE ---
+    contenedor.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, false);
     contenedor.addEventListener('touchend', e => {
         touchEndX = e.changedTouches[0].screenX;
-        handleGesture();
+        if (touchEndX < touchStartX - 50) cambiarMes(1);
+        if (touchEndX > touchStartX + 50) cambiarMes(-1);
     }, false);
-
-    function handleGesture() {
-        const threshold = 50; // Sensibilidad del arrastre
-        if (touchEndX < touchStartX - threshold) {
-            // Deslizó a la izquierda -> Mes Siguiente
-            cambiarMes(1);
-        }
-        if (touchEndX > touchStartX + threshold) {
-            // Deslizó a la derecha -> Mes Anterior
-            cambiarMes(-1);
-        }
-    }
 
     function cambiarMes(delta) {
         mesActual += delta;
@@ -110,51 +112,81 @@ document.addEventListener('DOMContentLoaded', () => {
         renderizar();
     }
 
-    // Botones de navegación
     document.getElementById('prevMonth').onclick = () => cambiarMes(-1);
     document.getElementById('nextMonth').onclick = () => cambiarMes(1);
-
-    // --- LÓGICA DE MODALES (Igual que antes) ---
-    window.abrirConfig = () => {
-        document.getElementById('cfgTitulo').value = configBanner.titulo;
-        document.getElementById('cfgFondo').value = configBanner.fondo;
-        document.getElementById('modalConfig').style.display = 'flex';
+    
+    window.irAHoy = () => { 
+        mesActual = hoyReal.getMonth(); 
+        añoActual = hoyReal.getFullYear(); 
+        window.cambiarVista('calendario'); // Asegura volver a la vista calendario
+        renderizar(); 
     };
 
-    window.guardarConfig = () => {
-        configBanner.titulo = document.getElementById('cfgTitulo').value || "BARBERIA 4154";
-        configBanner.fondo = document.getElementById('cfgFondo').value;
-        localStorage.setItem('pelu_config_v1', JSON.stringify(configBanner));
-        aplicarConfigVisual();
-        document.getElementById('modalConfig').style.display = 'none';
+    // --- 4. CONTROL DE VISTAS (SPA) ---
+    window.cambiarVista = (vistaId) => {
+        // Ocultar todas las vistas
+        document.querySelectorAll('.vista').forEach(v => v.classList.remove('activa'));
+        // Quitar estado activo de los botones de navegación
+        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+        
+        // Mostrar vista seleccionada
+        document.getElementById(`vista-${vistaId}`).classList.add('activa');
+        event.currentTarget.classList.add('active');
+
+        // Si entramos a reportes, cargar el gráfico por defecto (mensual)
+        if (vistaId === 'reportes') {
+            window.filtrarGrafico('mensual');
+        }
     };
 
+    // --- 5. LÓGICA DE MODALES (M3) ---
     window.abrirModalDia = (fecha) => {
         fechaSeleccionada = fecha;
         const regDia = registros.filter(r => r.fecha === fecha);
         document.getElementById('fechaDiaTitulo').innerText = fecha.split('-').reverse().join('/');
         const lista = document.getElementById('listaTurnosDia');
-        lista.innerHTML = regDia.length ? '' : '<p style="text-align:center; opacity:0.3; padding:20px;">Sin registros</p>';
+        lista.innerHTML = regDia.length ? '' : '<p style="text-align:center; opacity:0.5; padding:20px;">Sin registros hoy</p>';
         
         regDia.forEach(r => {
             const item = document.createElement('div');
-            item.className = 'lista-dia-item';
-            item.innerHTML = `<div><small>${r.hora}</small><br><b>✂️ ${r.titulo}</b></div>
-                             <span style="font-weight:800; color:${r.tipo==='gasto'?'#F2B8B5':'#B2F2BB'}">$${r.monto}</span>`;
+            item.className = 'md-card'; // Reutilizamos clase del CSS
+            item.style.margin = '0 0 8px 0';
+            item.style.padding = '12px';
+            item.style.display = 'flex';
+            item.style.justifyContent = 'space-between';
+            item.style.alignItems = 'center';
+            item.innerHTML = `
+                <div>
+                    <span style="font-size:12px; opacity:0.7;">${r.hora || '--:--'}</span><br>
+                    <b style="font-size:16px;">${r.titulo}</b>
+                </div>
+                <span style="font-weight:800; font-size:18px; color:${r.tipo==='gasto'?'#FFB4AB':'#81C784'}">$${r.monto}</span>
+            `;
             item.onclick = (e) => { e.stopPropagation(); window.prepararEdicion(registros.indexOf(r)); };
             lista.appendChild(item);
         });
-        document.getElementById('modalDia').style.display = 'flex';
+        document.getElementById('modalDia').classList.add('show');
     };
 
     window.abrirFormularioNuevo = () => {
         window.cerrarModalDia();
         indiceEdicion = -1;
+        // Si no seleccionó fecha, usa hoy
+        if(!fechaSeleccionada) {
+            fechaSeleccionada = `${hoyReal.getFullYear()}-${String(hoyReal.getMonth() + 1).padStart(2, '0')}-${String(hoyReal.getDate()).padStart(2, '0')}`;
+        }
+        
         document.getElementById('modalTitle').innerText = "Nuevo Registro";
         document.getElementById('nombreCliente').value = "";
         document.getElementById('montoTurno').value = "";
+        
+        // Hora actual por defecto
+        const ahora = new Date();
+        document.getElementById('horaTurno').value = `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`;
+        
+        document.querySelector('input[name="tipoRegistro"][value="ingreso"]').checked = true;
         document.getElementById('btnBorrar').style.display = "none";
-        document.getElementById('modalTurno').style.display = 'flex';
+        document.getElementById('modalTurno').classList.add('show');
     };
 
     window.prepararEdicion = (idx) => {
@@ -163,36 +195,64 @@ document.addEventListener('DOMContentLoaded', () => {
         indiceEdicion = idx;
         document.getElementById('modalTitle').innerText = "Editar Registro";
         document.getElementById('nombreCliente').value = r.titulo;
-        document.getElementById('horaTurno').value = r.hora;
+        document.getElementById('horaTurno').value = r.hora || "";
         document.getElementById('montoTurno').value = r.monto;
-        document.getElementById('tipoRegistro').value = r.tipo;
+        document.querySelector(`input[name="tipoRegistro"][value="${r.tipo}"]`).checked = true;
         document.getElementById('btnBorrar').style.display = "block";
-        document.getElementById('modalTurno').style.display = 'flex';
+        document.getElementById('modalTurno').classList.add('show');
     };
 
+    window.cerrarModalDia = () => document.getElementById('modalDia').classList.remove('show');
+    window.cerrarModal = () => document.getElementById('modalTurno').classList.remove('show');
+    
+    // Configuración
+    window.abrirConfig = () => {
+        document.getElementById('cfgTitulo').value = configBanner.titulo;
+        document.getElementById('nombreArchivoFondo').innerText = "Sin imagen nueva seleccionada";
+        document.getElementById('modalConfig').classList.add('show');
+    };
+    window.cerrarConfig = () => document.getElementById('modalConfig').classList.remove('show');
+
+    window.guardarConfig = () => {
+        configBanner.titulo = document.getElementById('cfgTitulo').value || "BARBERÍA 4154";
+        configBanner.fondo = tempImageBase64; // Guarda la imagen subida o la anterior
+        localStorage.setItem('pelu_config_v2', JSON.stringify(configBanner));
+        aplicarConfigVisual();
+        window.cerrarConfig();
+    };
+
+    // --- 6. GUARDAR Y BORRAR DATOS ---
     document.getElementById('btnGuardar').onclick = () => {
+        const titulo = document.getElementById('nombreCliente').value;
+        const monto = document.getElementById('montoTurno').value;
+        if(!titulo || !monto) return alert("Completá concepto y monto");
+
         const dato = {
             fecha: fechaSeleccionada,
-            titulo: document.getElementById('nombreCliente').value,
+            titulo: titulo,
             hora: document.getElementById('horaTurno').value,
-            monto: document.getElementById('montoTurno').value,
-            tipo: document.getElementById('tipoRegistro').value
+            monto: Number(monto),
+            tipo: document.querySelector('input[name="tipoRegistro"]:checked').value
         };
-        if(indiceEdicion > -1) registros[indiceEdicion] = dato; else registros.push(dato);
+
+        if(indiceEdicion > -1) registros[indiceEdicion] = dato; 
+        else registros.push(dato);
+        
         localStorage.setItem('pelu_datos_v6', JSON.stringify(registros));
-        document.getElementById('modalTurno').style.display = 'none';
+        window.cerrarModal();
         renderizar();
     };
 
     document.getElementById('btnBorrar').onclick = () => {
-        if(confirm("¿Eliminar este registro?")) {
+        if(confirm("¿Eliminar definitivamente este registro?")) {
             registros.splice(indiceEdicion, 1);
             localStorage.setItem('pelu_datos_v6', JSON.stringify(registros));
-            document.getElementById('modalTurno').style.display = 'none';
+            window.cerrarModal();
             renderizar();
         }
     };
 
+    // --- 7. ESTADÍSTICAS INTELIGENTES (CHART.JS) ---
     function actualizarEconomia() {
         const mesStr = `${añoActual}-${String(mesActual+1).padStart(2,'0')}`;
         const regMes = registros.filter(r => r.fecha.startsWith(mesStr));
@@ -203,10 +263,82 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('totalNeto').innerText = `$${(ing - gas).toLocaleString()}`;
     }
 
-    window.cerrarModalDia = () => document.getElementById('modalDia').style.display = 'none';
-    window.cerrarModal = () => document.getElementById('modalTurno').style.display = 'none';
-    window.cerrarConfig = () => document.getElementById('modalConfig').style.display = 'none';
-    window.irAHoy = () => { mesActual = hoyReal.getMonth(); añoActual = hoyReal.getFullYear(); renderizar(); };
-    
+    window.filtrarGrafico = (periodo) => {
+        // Actualizar chips visuales
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        if(event) event.target.classList.add('active');
+
+        let etiquetas = [];
+        let datosIngresos = [];
+        let datosGastos = [];
+
+        // Procesar datos según filtro
+        if (periodo === 'mensual') {
+            // Últimos 6 meses
+            for (let i = 5; i >= 0; i--) {
+                let d = new Date(hoyReal.getFullYear(), hoyReal.getMonth() - i, 1);
+                let mesStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2,'0')}`;
+                let nombreMes = d.toLocaleString('es', { month: 'short' });
+                etiquetas.push(nombreMes.toUpperCase());
+
+                let reg = registros.filter(r => r.fecha.startsWith(mesStr));
+                datosIngresos.push(reg.filter(r => r.tipo === 'ingreso').reduce((sum, r) => sum + r.monto, 0));
+                datosGastos.push(reg.filter(r => r.tipo === 'gasto').reduce((sum, r) => sum + r.monto, 0));
+            }
+        } else if (periodo === 'diario') {
+            // Últimos 7 días
+            for (let i = 6; i >= 0; i--) {
+                let d = new Date();
+                d.setDate(d.getDate() - i);
+                let diaStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+                etiquetas.push(`${d.getDate()}/${d.getMonth()+1}`);
+
+                let reg = registros.filter(r => r.fecha === diaStr);
+                datosIngresos.push(reg.filter(r => r.tipo === 'ingreso').reduce((sum, r) => sum + r.monto, 0));
+                datosGastos.push(reg.filter(r => r.tipo === 'gasto').reduce((sum, r) => sum + r.monto, 0));
+            }
+        } else if (periodo === 'anual') {
+            // Últimos 3 años
+            for (let i = 2; i >= 0; i--) {
+                let y = hoyReal.getFullYear() - i;
+                etiquetas.push(y);
+                let reg = registros.filter(r => r.fecha.startsWith(y.toString()));
+                datosIngresos.push(reg.filter(r => r.tipo === 'ingreso').reduce((sum, r) => sum + r.monto, 0));
+                datosGastos.push(reg.filter(r => r.tipo === 'gasto').reduce((sum, r) => sum + r.monto, 0));
+            }
+        }
+
+        renderizarGrafico(etiquetas, datosIngresos, datosGastos);
+    };
+
+    function renderizarGrafico(etiquetas, ingresos, gastos) {
+        const ctx = document.getElementById('graficoBalance').getContext('2d');
+        
+        if(chartInstance) chartInstance.destroy();
+
+        chartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: etiquetas,
+                datasets: [
+                    { label: 'Ingresos', data: ingresos, backgroundColor: '#81C784', borderRadius: 4 },
+                    { label: 'Gastos', data: gastos, backgroundColor: '#FFB4AB', borderRadius: 4 }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#E6E1E5' } }
+                },
+                scales: {
+                    y: { ticks: { color: '#938F99' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                    x: { ticks: { color: '#938F99' }, grid: { display: false } }
+                }
+            }
+        });
+    }
+
+    // --- INICIALIZACIÓN ---
     renderizar();
 });

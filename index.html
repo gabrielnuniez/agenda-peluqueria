@@ -3,101 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Peluquería Elite PRO</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Control Interno - Barbería</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1C1B1F">
 </head>
 <body>
 
-    <header class="banner">
+    <header class="md-banner">
         <div id="bannerBg" class="banner-bg"></div>
+        <div class="banner-overlay"></div>
         <div class="banner-content">
-            <h1 id="txtBannerDisplay">BARBERIA 4154</h1>
+            <h1 id="txtBannerDisplay" class="md-title">BARBERÍA 4154</h1>
             <div class="banner-actions">
-                <button class="btn-icon" onclick="window.abrirConfig()">⚙️</button>
-                <button class="btn-hoy-top" onclick="window.irAHoy()">📅 Hoy</button>
+                <button class="md-icon-btn" onclick="window.abrirConfig()" aria-label="Configuración">
+                    <span class="material-symbols-rounded">settings</span>
+                </button>
             </div>
         </div>
     </header>
 
-    <nav class="header-nav">
-        <button id="prevMonth" class="btn-nav-circle"><span>&#10094;</span></button>
-        <h2 id="monthYear">--</h2>
-        <button id="nextMonth" class="btn-nav-circle"><span>&#10095;</span></button>
+    <nav class="md-bottom-nav">
+        <button class="nav-item active" onclick="window.cambiarVista('calendario')">
+            <span class="material-symbols-rounded">calendar_month</span>
+            <span>Agenda</span>
+        </button>
+        <button class="nav-item" onclick="window.irAHoy()">
+            <span class="material-symbols-rounded">today</span>
+            <span>Hoy</span>
+        </button>
+        <button class="nav-item" onclick="window.cambiarVista('reportes')">
+            <span class="material-symbols-rounded">insights</span>
+            <span>Resumen</span>
+        </button>
     </nav>
 
-    <div class="weekdays-grid">
-        <div>LU</div><div>MA</div><div>MI</div><div>JU</div><div>VI</div><div>SA</div><div>DO</div>
-    </div>
+    <main id="app-content">
+        
+        <section id="vista-calendario" class="vista activa">
+            <div class="header-nav">
+                <button id="prevMonth" class="md-icon-btn"><span class="material-symbols-rounded">chevron_left</span></button>
+                <h2 id="monthYear" class="mes-titulo">--</h2>
+                <button id="nextMonth" class="md-icon-btn"><span class="material-symbols-rounded">chevron_right</span></button>
+            </div>
 
-    <main id="calendar-container">
-        <div id="calendar"></div>
+            <div class="weekdays-grid">
+                <div>D</div><div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div>
+            </div>
+
+            <div id="calendar-container">
+                <div id="calendar"></div>
+            </div>
+            
+            <footer id="footer-summary" class="md-surface">
+                <div class="stat-box">
+                    <span class="stat-label">Ingresos</span>
+                    <span id="totalIngresos" class="stat-value text-green">$ 0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Gastos</span>
+                    <span id="totalGastos" class="stat-value text-red">$ 0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Neto</span>
+                    <span id="totalNeto" class="stat-value text-primary">$ 0</span>
+                </div>
+            </footer>
+
+            <button class="md-fab" onclick="window.abrirFormularioNuevo()" aria-label="Nuevo Registro">
+                <span class="material-symbols-rounded">add</span>
+            </button>
+        </section>
+
+        <section id="vista-reportes" class="vista oculta">
+            <h2 class="section-title">Análisis de Negocio</h2>
+            
+            <div class="md-card">
+                <h3>Balance General</h3>
+                <div class="filtros-tiempo">
+                    <button class="chip active" onclick="filtrarGrafico('diario')">Día</button>
+                    <button class="chip" onclick="filtrarGrafico('semanal')">Semana</button>
+                    <button class="chip" onclick="filtrarGrafico('mensual')">Mes</button>
+                    <button class="chip" onclick="filtrarGrafico('anual')">Año</button>
+                </div>
+                <div class="chart-container">
+                    <canvas id="graficoBalance"></canvas>
+                </div>
+            </div>
+        </section>
+
     </main>
 
-    <footer id="footer-summary">
-        <div class="stat-box">
-            <span class="stat-label">Ingresos</span>
-            <span id="totalIngresos" class="stat-value" style="color: #B2F2BB;">$ 0</span>
+    <div id="modalDia" class="md-bottom-sheet">
+        <div class="sheet-content md-surface">
+            <div class="drag-handle"></div>
+            <h2 id="fechaDiaTitulo" class="sheet-title">--/--/----</h2>
+            <div id="listaTurnosDia" class="scroll-area list-group"></div>
+            <button class="md-btn btn-text" onclick="window.cerrarModalDia()">CERRAR</button>
         </div>
-        <div class="stat-box">
-            <span class="stat-label">Gastos</span>
-            <span id="totalGastos" class="stat-value" style="color: #F2B8B5;">$ 0</span>
-        </div>
-        <div class="stat-box">
-            <span class="stat-label">Neto</span>
-            <span id="totalNeto" class="stat-value">$ 0</span>
-        </div>
-    </footer>
-
-    <div id="modalDia" class="modal">
-        <div class="modal-content card-material">
-            <div class="modal-handle"></div>
-            <h2 id="fechaDiaTitulo" class="modal-date-title">--/--/----</h2>
-            <button class="btn-primary-full" onclick="window.abrirFormularioNuevo()">+ NUEVO REGISTRO</button>
-            <div id="listaTurnosDia" class="scroll-area"></div>
-            <button class="btn-text-only" onclick="window.cerrarModalDia()">CERRAR</button>
-        </div>
+        <div class="sheet-backdrop" onclick="window.cerrarModalDia()"></div>
     </div>
 
-    <div id="modalTurno" class="modal">
-        <div class="modal-content card-material">
-            <div class="modal-handle"></div>
-            <h2 id="modalTitle">Nuevo Registro</h2>
-            <div class="input-group">
-                <input type="text" id="nombreCliente" placeholder="Nombre / Concepto">
-                <div class="row-inputs">
-                    <input type="time" id="horaTurno">
-                    <input type="number" id="montoTurno" placeholder="Monto $">
+    <div id="modalTurno" class="md-dialog">
+        <div class="dialog-content md-surface">
+            <h2 id="modalTitle" class="dialog-title">Nuevo Registro</h2>
+            
+            <div class="md-input-group">
+                <div class="tipo-selector">
+                    <label class="md-radio">
+                        <input type="radio" name="tipoRegistro" value="ingreso" checked>
+                        <span class="radio-chip ingreso">
+                            <span class="material-symbols-rounded">trending_up</span> Ingreso
+                        </span>
+                    </label>
+                    <label class="md-radio">
+                        <input type="radio" name="tipoRegistro" value="gasto">
+                        <span class="radio-chip gasto">
+                            <span class="material-symbols-rounded">trending_down</span> Gasto
+                        </span>
+                    </label>
                 </div>
-                <select id="tipoRegistro">
-                    <option value="ingreso">✂️ Turno (Ingreso)</option>
-                    <option value="gasto">💸 Gasto (Egreso)</option>
-                </select>
+
+                <div class="md-field">
+                    <input type="text" id="nombreCliente" required placeholder=" ">
+                    <label>Concepto / Cliente</label>
+                </div>
+
+                <div class="row-inputs">
+                    <div class="md-field">
+                        <input type="time" id="horaTurno" required>
+                    </div>
+                    <div class="md-field">
+                        <input type="number" id="montoTurno" required placeholder=" ">
+                        <label>Monto ($)</label>
+                    </div>
+                </div>
             </div>
-            <div class="modal-btns-vertical">
-                <button class="btn-primary-full" id="btnGuardar">GUARDAR</button>
-                <button class="btn-danger-full" id="btnBorrar" style="display:none;">ELIMINAR REGISTRO</button>
-                <button class="btn-text-only" onclick="window.cerrarModal()">CANCELAR</button>
+
+            <div class="dialog-actions">
+                <button class="md-btn btn-text error" id="btnBorrar" style="display:none;">ELIMINAR</button>
+                <div class="flex-spacer"></div>
+                <button class="md-btn btn-text" onclick="window.cerrarModal()">CANCELAR</button>
+                <button class="md-btn btn-filled" id="btnGuardar">GUARDAR</button>
             </div>
         </div>
+        <div class="dialog-backdrop" onclick="window.cerrarModal()"></div>
     </div>
 
-    <div id="modalConfig" class="modal">
-        <div class="modal-content card-material">
-            <div class="modal-handle"></div>
-            <h2>Configuración</h2>
-            <div class="input-group">
-                <label style="font-size: 12px; opacity: 0.7;">Nombre de la Barbería</label>
-                <input type="text" id="cfgTitulo" placeholder="Ej: BARBERIA 4154">
-                <label style="font-size: 12px; opacity: 0.7;">URL Imagen de Fondo</label>
-                <input type="text" id="cfgFondo" placeholder="https://imagen.com/foto.jpg">
+    <div id="modalConfig" class="md-dialog">
+        <div class="dialog-content md-surface">
+            <h2 class="dialog-title">Configuración</h2>
+            
+            <div class="md-input-group">
+                <div class="md-field">
+                    <input type="text" id="cfgTitulo" required placeholder=" ">
+                    <label>Nombre del Local</label>
+                </div>
+                
+                <div class="file-upload-wrapper">
+                    <span class="upload-label">Imagen de Portada</span>
+                    <label for="cfgFondoFile" class="md-btn btn-outlined upload-btn">
+                        <span class="material-symbols-rounded">photo_library</span>
+                        Elegir de la galería
+                    </label>
+                    <input type="file" id="cfgFondoFile" accept="image/*" style="display: none;">
+                    <p id="nombreArchivoFondo" class="file-name"></p>
+                </div>
             </div>
-            <div class="modal-btns-vertical">
-                <button class="btn-primary-full" onclick="window.guardarConfig()">APLICAR CAMBIOS</button>
-                <button class="btn-text-only" onclick="window.cerrarConfig()">VOLVER</button>
+
+            <div class="dialog-actions">
+                <button class="md-btn btn-text" onclick="window.cerrarConfig()">VOLVER</button>
+                <button class="md-btn btn-filled" onclick="window.guardarConfig()">APLICAR</button>
             </div>
         </div>
+        <div class="dialog-backdrop" onclick="window.cerrarConfig()"></div>
     </div>
 
     <script src="script.js"></script>
