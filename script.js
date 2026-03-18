@@ -12,10 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let configBanner = JSON.parse(localStorage.getItem('pelu_config_v2')) || {
         titulo: "BARBERÍA 4154",
-        fondo: "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80"
+        fondo: "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80",
+        logo: "" // Guardamos el logo acá
     };
     
     let tempImageBase64 = configBanner.fondo; 
+    let tempLogoBase64 = configBanner.logo; // Variable temporal para el logo
     let registros = JSON.parse(localStorage.getItem('pelu_datos_v6')) || [];
     
     const contenedor = document.getElementById('calendar');
@@ -25,25 +27,29 @@ document.addEventListener('DOMContentLoaded', () => {
     function aplicarConfigVisual() {
         document.getElementById('txtBannerDisplay').innerText = configBanner.titulo;
         document.getElementById('bannerBg').style.backgroundImage = `url('${configBanner.fondo}')`;
+        
+        const perfilDisplay = document.getElementById('perfilDisplay');
+        if (configBanner.logo) {
+            perfilDisplay.innerHTML = `<img src="${configBanner.logo}" alt="Perfil">`;
+        } else {
+            perfilDisplay.innerHTML = `<span class="material-symbols-rounded">storefront</span>`;
+        }
     }
 
     function actualizarBannerInfo() {
         const ahora = new Date();
         const hora = ahora.getHours();
         
-        // 1. Saludo dinámico
         let saludo = "¡Buenas noches!";
         if (hora >= 5 && hora < 12) saludo = "¡Buenos días!";
         else if (hora >= 12 && hora < 19) saludo = "¡Buenas tardes!";
         document.getElementById('saludoText').innerText = saludo;
 
-        // 2. Fecha actual amigable
         const opcionesFecha = { weekday: 'long', day: 'numeric', month: 'long' };
         let fechaStr = ahora.toLocaleDateString('es-ES', opcionesFecha);
-        fechaStr = fechaStr.charAt(0).toUpperCase() + fechaStr.slice(1); // Mayúscula inicial
+        fechaStr = fechaStr.charAt(0).toUpperCase() + fechaStr.slice(1);
         document.getElementById('fechaBannerDisplay').innerText = fechaStr;
 
-        // 3. Contador de turnos de hoy (solo ingresos)
         const strHoy = `${hoyReal.getFullYear()}-${String(hoyReal.getMonth() + 1).padStart(2, '0')}-${String(hoyReal.getDate()).padStart(2, '0')}`;
         const turnosHoy = registros.filter(r => r.fecha === strHoy && r.tipo === 'ingreso').length;
         
@@ -56,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
+    // Lector de imagen de Fondo
     const inputFondo = document.getElementById('cfgFondoFile');
     inputFondo.addEventListener('change', function(e) {
         const file = this.files[0];
@@ -64,6 +71,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const reader = new FileReader();
             reader.onload = function(evento) {
                 tempImageBase64 = evento.target.result; 
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // Lector de imagen de Logo
+    const inputLogo = document.getElementById('cfgLogoFile');
+    inputLogo.addEventListener('change', function(e) {
+        const file = this.files[0];
+        if (file) {
+            document.getElementById('nombreArchivoLogo').innerText = file.name;
+            const reader = new FileReader();
+            reader.onload = function(evento) {
+                tempLogoBase64 = evento.target.result; 
             };
             reader.readAsDataURL(file);
         }
@@ -113,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             aplicarConfigVisual();
-            actualizarBannerInfo(); // Actualiza el saludo y contador de turnos
+            actualizarBannerInfo(); 
             actualizarEconomia();
             
             contenedor.style.opacity = '1';
@@ -320,6 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.abrirConfig = () => {
         document.getElementById('cfgTitulo').value = configBanner.titulo;
         document.getElementById('nombreArchivoFondo').innerText = "Sin imagen nueva seleccionada";
+        document.getElementById('nombreArchivoLogo').innerText = "Sin foto nueva seleccionada";
         document.getElementById('modalConfig').classList.add('show');
     };
     window.cerrarConfig = () => document.getElementById('modalConfig').classList.remove('show');
@@ -327,6 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.guardarConfig = () => {
         configBanner.titulo = document.getElementById('cfgTitulo').value || "BARBERÍA 4154";
         configBanner.fondo = tempImageBase64; 
+        configBanner.logo = tempLogoBase64; // Guardamos el logo modificado
         localStorage.setItem('pelu_config_v2', JSON.stringify(configBanner));
         aplicarConfigVisual();
         window.cerrarConfig();
@@ -358,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(document.getElementById('vista-hoy').classList.contains('activa')) {
             renderizarVistaHoy();
         } 
-        renderizar(); // Esto asegura que el calendario general, el contador y estadísticas también se actualicen
+        renderizar(); 
     };
 
     document.getElementById('btnBorrar').onclick = () => {
