@@ -143,12 +143,27 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // --- 3. NAVEGACIÓN Y SWIPE ---
-    contenedor.addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, false);
+    let touchStartY = 0;
+    
+    contenedor.addEventListener('touchstart', e => { 
+        touchStartX = e.changedTouches[0].screenX; 
+        touchStartY = e.changedTouches[0].screenY;
+    }, {passive: true});
+
     contenedor.addEventListener('touchend', e => {
         touchEndX = e.changedTouches[0].screenX;
-        if (touchEndX < touchStartX - 50) cambiarMes(1);
-        if (touchEndX > touchStartX + 50) cambiarMes(-1);
-    }, false);
+        let touchEndY = e.changedTouches[0].screenY;
+        
+        // Calculamos cuánto se movió el dedo en cada dirección
+        let diffX = Math.abs(touchEndX - touchStartX);
+        let diffY = Math.abs(touchEndY - touchStartY);
+
+        // Solo cambiamos de mes si el movimiento fue más horizontal que vertical, y mayor a 50px
+        if (diffX > diffY && diffX > 50) {
+            if (touchEndX < touchStartX) cambiarMes(1);
+            if (touchEndX > touchStartX) cambiarMes(-1);
+        }
+    }, {passive: true});
 
     function cambiarMes(delta) {
         mesActual += delta;
