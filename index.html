@@ -35,7 +35,7 @@
             <span class="material-symbols-rounded">calendar_month</span>
             <span>Agenda</span>
         </button>
-        <button class="nav-item" onclick="window.irAHoy()">
+        <button class="nav-item" onclick="window.cambiarVista('hoy')">
             <span class="material-symbols-rounded">today</span>
             <span>Hoy</span>
         </button>
@@ -64,7 +64,7 @@
             
             <footer id="footer-summary" class="md-surface">
                 <div class="stat-box">
-                    <span class="stat-label">Ingresos</span>
+                    <span class="stat-label">Bruto</span>
                     <span id="totalIngresos" class="stat-value text-green">$ 0</span>
                 </div>
                 <div class="stat-box">
@@ -80,6 +80,30 @@
             <button class="md-fab" onclick="window.abrirFormularioNuevo(false)" aria-label="Nuevo Registro">
                 <span class="material-symbols-rounded">add</span>
             </button>
+        </section>
+
+        <section id="vista-hoy" class="vista oculta" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 class="section-title" style="padding: 0;">Actividad de Hoy</h2>
+                <span id="fechaHoyDisplay" style="color: var(--md-sys-color-primary); font-weight: 500;">--/--/----</span>
+            </div>
+            
+            <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+                <div class="md-card" style="margin: 0; flex: 1; padding: 12px; text-align: center;">
+                    <span style="font-size: 12px; opacity: 0.7;">Bruto Hoy</span><br>
+                    <b id="brutoHoyDisplay" style="color: #81C784; font-size: 18px;">$0</b>
+                </div>
+                <div class="md-card" style="margin: 0; flex: 1; padding: 12px; text-align: center;">
+                    <span style="font-size: 12px; opacity: 0.7;">Gastos Hoy</span><br>
+                    <b id="gastosHoyDisplay" style="color: #FFB4AB; font-size: 18px;">$0</b>
+                </div>
+            </div>
+
+            <button class="md-btn btn-filled" style="width: 100%; margin-bottom: 24px; padding: 16px; border-radius: 16px;" onclick="window.abrirFormularioNuevo(false)">
+                <span class="material-symbols-rounded" style="vertical-align: middle; margin-right: 8px;">add_circle</span> NUEVO REGISTRO HOY
+            </button>
+
+            <div id="listaTurnosHoyVista" class="scroll-area list-group" style="max-height: none;"></div>
         </section>
 
         <section id="vista-reportes" class="vista oculta">
@@ -141,13 +165,13 @@
                     <label>Concepto / Cliente</label>
                 </div>
 
-                <div class="md-field">
+                <div class="md-field" id="campoTelefono">
                     <input type="tel" id="telefonoCliente" placeholder=" ">
                     <label>Teléfono (Opcional - WhatsApp)</label>
                 </div>
 
                 <div class="row-inputs">
-                    <div class="md-field">
+                    <div class="md-field" id="campoHora">
                         <input type="time" id="horaTurno" required>
                     </div>
                     <div class="md-field">

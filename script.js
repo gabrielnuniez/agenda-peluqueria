@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let añoActual = hoyReal.getFullYear();
     let fechaSeleccionada = "";
     let indiceEdicion = -1;
-    let chartInstance = null; // Para el gráfico de estadísticas
+    let chartInstance = null; 
 
     // --- VARIABLES PARA SWIPE ---
     let touchStartX = 0;
@@ -15,22 +15,47 @@ document.addEventListener('DOMContentLoaded', () => {
         fondo: "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80"
     };
     
-    // Variable temporal para la imagen subida
     let tempImageBase64 = configBanner.fondo; 
-
-    // Mantenemos la misma llave de almacenamiento para no perder tus datos actuales
     let registros = JSON.parse(localStorage.getItem('pelu_datos_v6')) || [];
     
     const contenedor = document.getElementById('calendar');
     const displayMes = document.getElementById('monthYear');
 
-    // --- 1. CONFIGURACIÓN VISUAL Y BANNER ---
+    // --- 1. CONFIGURACIÓN VISUAL, BANNER E INFO INTELIGENTE ---
     function aplicarConfigVisual() {
         document.getElementById('txtBannerDisplay').innerText = configBanner.titulo;
         document.getElementById('bannerBg').style.backgroundImage = `url('${configBanner.fondo}')`;
     }
 
-    // Lector de imagen desde galería local
+    function actualizarBannerInfo() {
+        const ahora = new Date();
+        const hora = ahora.getHours();
+        
+        // 1. Saludo dinámico
+        let saludo = "¡Buenas noches!";
+        if (hora >= 5 && hora < 12) saludo = "¡Buenos días!";
+        else if (hora >= 12 && hora < 19) saludo = "¡Buenas tardes!";
+        document.getElementById('saludoText').innerText = saludo;
+
+        // 2. Fecha actual amigable
+        const opcionesFecha = { weekday: 'long', day: 'numeric', month: 'long' };
+        let fechaStr = ahora.toLocaleDateString('es-ES', opcionesFecha);
+        fechaStr = fechaStr.charAt(0).toUpperCase() + fechaStr.slice(1); // Mayúscula inicial
+        document.getElementById('fechaBannerDisplay').innerText = fechaStr;
+
+        // 3. Contador de turnos de hoy (solo ingresos)
+        const strHoy = `${hoyReal.getFullYear()}-${String(hoyReal.getMonth() + 1).padStart(2, '0')}-${String(hoyReal.getDate()).padStart(2, '0')}`;
+        const turnosHoy = registros.filter(r => r.fecha === strHoy && r.tipo === 'ingreso').length;
+        
+        let textoTurnos = turnosHoy === 1 ? '1 turno hoy' : `${turnosHoy} turnos hoy`;
+        if (turnosHoy === 0) textoTurnos = 'Sin turnos hoy';
+
+        document.getElementById('contadorTurnos').innerHTML = `
+            <span class="material-symbols-rounded">event</span>
+            <span>${textoTurnos}</span>
+        `;
+    }
+
     const inputFondo = document.getElementById('cfgFondoFile');
     inputFondo.addEventListener('change', function(e) {
         const file = this.files[0];
@@ -38,13 +63,13 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('nombreArchivoFondo').innerText = file.name;
             const reader = new FileReader();
             reader.onload = function(evento) {
-                tempImageBase64 = evento.target.result; // Guarda la imagen en base64
+                tempImageBase64 = evento.target.result; 
             };
             reader.readAsDataURL(file);
         }
     });
 
-    // --- 2. RENDERIZADO DEL CALENDARIO (M3) ---
+    // --- 2. RENDERIZADO DEL CALENDARIO ---
     window.renderizar = () => {
         contenedor.style.opacity = '0';
         contenedor.style.transform = 'translateY(10px)';
@@ -57,7 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const primerDia = new Date(añoActual, mesActual, 1).getDay();
             const totalDias = new Date(añoActual, mesActual + 1, 0).getDate();
             
-            // Adaptar para que la semana empiece en Domingo (0)
             for (let i = 0; i < primerDia; i++) {
                 contenedor.appendChild(Object.assign(document.createElement('div'), {className: 'day empty'}));
             }
@@ -77,7 +101,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 list.className = 'day-events'; 
                 list.style.width = '100%';
                 
-                // Mostrar todos los turnos del día
                 regDia.sort((a,b) => (a.hora > b.hora ? 1 : -1)).forEach(r => {
                     const dot = document.createElement('div');
                     dot.className = `event-indicator ${r.tipo === 'gasto' ? 'event-gasto' : 'event-ingreso'}`;
@@ -90,6 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             aplicarConfigVisual();
+            actualizarBannerInfo(); // Actualiza el saludo y contador de turnos
             actualizarEconomia();
             
             contenedor.style.opacity = '1';
@@ -114,13 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('prevMonth').onclick = () => cambiarMes(-1);
     document.getElementById('nextMonth').onclick = () => cambiarMes(1);
-    
-    window.irAHoy = () => { 
-        mesActual = hoyReal.getMonth(); 
-        añoActual = hoyReal.getFullYear(); 
-        window.cambiarVista('calendario'); 
-        renderizar(); 
-    };
 
     // --- 4. CONTROL DE VISTAS (SPA) ---
     window.cambiarVista = (vistaId) => {
@@ -130,12 +147,80 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById(`vista-${vistaId}`).classList.add('activa');
         event.currentTarget.classList.add('active');
 
-        if (vistaId === 'reportes') {
+        if (vistaId === 'hoy') {
+            renderizarVistaHoy();
+        } else if (vistaId === 'reportes') {
             window.filtrarGrafico('mensual');
+        } else {
+            renderizar();
         }
     };
 
-    // --- 5. LÓGICA DE MODALES (M3) Y WHATSAPP ---
+    // --- 4.1. LÓGICA VISTA "HOY" ---
+    function renderizarVistaHoy() {
+        const strHoy = `${hoyReal.getFullYear()}-${String(hoyReal.getMonth() + 1).padStart(2, '0')}-${String(hoyReal.getDate()).padStart(2, '0')}`;
+        fechaSeleccionada = strHoy; 
+        
+        const regHoy = registros.filter(r => r.fecha === strHoy);
+        document.getElementById('fechaHoyDisplay').innerText = strHoy.split('-').reverse().join('/');
+        
+        const ing = regHoy.filter(r => r.tipo === 'ingreso').reduce((a, b) => a + Number(b.monto), 0);
+        const gas = regHoy.filter(r => r.tipo === 'gasto').reduce((a, b) => a + Number(b.monto), 0);
+        document.getElementById('brutoHoyDisplay').innerText = `$${ing.toLocaleString()}`;
+        document.getElementById('gastosHoyDisplay').innerText = `$${gas.toLocaleString()}`;
+
+        const lista = document.getElementById('listaTurnosHoyVista');
+        lista.innerHTML = regHoy.length ? '' : '<p style="text-align:center; opacity:0.5; padding:40px 20px;">No hay actividad registrada para hoy.</p>';
+        
+        regHoy.sort((a,b) => (a.hora > b.hora ? 1 : -1)).forEach(r => {
+            const item = document.createElement('div');
+            item.className = 'md-card'; 
+            item.style.margin = '0 0 12px 0';
+            item.style.padding = '16px';
+            item.style.display = 'flex';
+            item.style.justifyContent = 'space-between';
+            item.style.alignItems = 'center';
+            item.style.borderLeft = `4px solid ${r.tipo === 'gasto' ? '#FFB4AB' : '#81C784'}`;
+            
+            let btnWsp = '';
+            if (r.tipo === 'ingreso' && r.telefono) {
+                const telLimpio = r.telefono.replace(/\D/g, ''); 
+                const mensaje = encodeURIComponent(`Hola ${r.titulo}, te escribimos de ${configBanner.titulo} para recordarte tu turno hoy a las ${r.hora}. ¡Te esperamos!`);
+                btnWsp = `<a href="https://wa.me/${telLimpio}?text=${mensaje}" target="_blank" class="wsp-btn" onclick="event.stopPropagation()"><span class="material-symbols-rounded" style="color: white; font-size: 18px;">chat</span></a>`;
+            }
+
+            const displayHora = r.tipo === 'gasto' ? '' : `<span style="font-size:12px; opacity:0.7;">${r.hora || '--:--'}</span><br>`;
+
+            item.innerHTML = `
+                <div style="flex-grow: 1;">
+                    ${displayHora}
+                    <b style="font-size:16px;">${r.titulo}</b>
+                </div>
+                <div style="display:flex; align-items:center; gap: 12px;">
+                    ${btnWsp}
+                    <span style="font-weight:800; font-size:18px; color:${r.tipo==='gasto'?'#FFB4AB':'#81C784'}">$${r.monto}</span>
+                </div>
+            `;
+            item.onclick = (e) => { e.stopPropagation(); window.prepararEdicion(registros.indexOf(r)); };
+            lista.appendChild(item);
+        });
+    }
+
+    // --- 5. LÓGICA DE MODALES ---
+    document.querySelectorAll('input[name="tipoRegistro"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const campoTel = document.getElementById('campoTelefono');
+            const campoHora = document.getElementById('campoHora');
+            if (e.target.value === 'gasto') {
+                campoTel.style.display = 'none';
+                campoHora.style.display = 'none';
+            } else {
+                campoTel.style.display = 'block';
+                campoHora.style.display = 'block';
+            }
+        });
+    });
+
     window.abrirModalDia = (fecha) => {
         fechaSeleccionada = fecha;
         const regDia = registros.filter(r => r.fecha === fecha);
@@ -143,9 +228,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('fechaDiaTitulo').innerText = fechaFormateada;
         
         const lista = document.getElementById('listaTurnosDia');
-        lista.innerHTML = regDia.length ? '' : '<p style="text-align:center; opacity:0.5; padding:20px;">Sin registros hoy</p>';
+        lista.innerHTML = regDia.length ? '' : '<p style="text-align:center; opacity:0.5; padding:20px;">Sin registros</p>';
         
-        regDia.forEach(r => {
+        regDia.sort((a,b) => (a.hora > b.hora ? 1 : -1)).forEach(r => {
             const item = document.createElement('div');
             item.className = 'md-card'; 
             item.style.margin = '0 0 8px 0';
@@ -154,17 +239,18 @@ document.addEventListener('DOMContentLoaded', () => {
             item.style.justifyContent = 'space-between';
             item.style.alignItems = 'center';
             
-            // Lógica Botón WhatsApp
             let btnWsp = '';
             if (r.tipo === 'ingreso' && r.telefono) {
                 const telLimpio = r.telefono.replace(/\D/g, ''); 
                 const mensaje = encodeURIComponent(`Hola ${r.titulo}, te escribimos de ${configBanner.titulo} para recordarte tu turno el día ${fechaFormateada} a las ${r.hora}. ¡Te esperamos!`);
-                btnWsp = `<a href="https://wa.me/${telLimpio}?text=${mensaje}" target="_blank" class="wsp-btn" onclick="event.stopPropagation()"><span class="material-symbols-rounded" style="color: white;">chat</span></a>`;
+                btnWsp = `<a href="https://wa.me/${telLimpio}?text=${mensaje}" target="_blank" class="wsp-btn" onclick="event.stopPropagation()"><span class="material-symbols-rounded" style="color: white; font-size: 18px;">chat</span></a>`;
             }
+
+            const displayHora = r.tipo === 'gasto' ? '' : `<span style="font-size:12px; opacity:0.7;">${r.hora || '--:--'}</span><br>`;
 
             item.innerHTML = `
                 <div style="flex-grow: 1;">
-                    <span style="font-size:12px; opacity:0.7;">${r.hora || '--:--'}</span><br>
+                    ${displayHora}
                     <b style="font-size:16px;">${r.titulo}</b>
                 </div>
                 <div style="display:flex; align-items:center; gap: 12px;">
@@ -181,7 +267,9 @@ document.addEventListener('DOMContentLoaded', () => {
     window.abrirFormularioNuevo = (desdeModalDia = false) => {
         if (!desdeModalDia) {
             window.cerrarModalDia();
-            fechaSeleccionada = `${hoyReal.getFullYear()}-${String(hoyReal.getMonth() + 1).padStart(2, '0')}-${String(hoyReal.getDate()).padStart(2, '0')}`;
+            if(document.getElementById('vista-calendario').classList.contains('activa') || fechaSeleccionada === "") {
+                fechaSeleccionada = `${hoyReal.getFullYear()}-${String(hoyReal.getMonth() + 1).padStart(2, '0')}-${String(hoyReal.getDate()).padStart(2, '0')}`;
+            }
         }
         
         indiceEdicion = -1;
@@ -194,6 +282,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('horaTurno').value = `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`;
         
         document.querySelector('input[name="tipoRegistro"][value="ingreso"]').checked = true;
+        document.getElementById('campoTelefono').style.display = 'block';
+        document.getElementById('campoHora').style.display = 'block';
+        
         document.getElementById('btnBorrar').style.display = "none";
         document.getElementById('modalTurno').classList.add('show');
     };
@@ -207,7 +298,17 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('telefonoCliente').value = r.telefono || "";
         document.getElementById('horaTurno').value = r.hora || "";
         document.getElementById('montoTurno').value = r.monto;
+        
         document.querySelector(`input[name="tipoRegistro"][value="${r.tipo}"]`).checked = true;
+        
+        if (r.tipo === 'gasto') {
+            document.getElementById('campoTelefono').style.display = 'none';
+            document.getElementById('campoHora').style.display = 'none';
+        } else {
+            document.getElementById('campoTelefono').style.display = 'block';
+            document.getElementById('campoHora').style.display = 'block';
+        }
+
         document.getElementById('btnBorrar').style.display = "block";
         document.getElementById('modalTurno').classList.add('show');
     };
@@ -235,15 +336,17 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btnGuardar').onclick = () => {
         const titulo = document.getElementById('nombreCliente').value;
         const monto = document.getElementById('montoTurno').value;
+        const tipoReg = document.querySelector('input[name="tipoRegistro"]:checked').value;
+        
         if(!titulo || !monto) return alert("Completá concepto y monto");
 
         const dato = {
             fecha: fechaSeleccionada,
             titulo: titulo,
-            telefono: document.getElementById('telefonoCliente').value,
-            hora: document.getElementById('horaTurno').value,
+            telefono: tipoReg === 'ingreso' ? document.getElementById('telefonoCliente').value : '',
+            hora: tipoReg === 'ingreso' ? document.getElementById('horaTurno').value : '',
             monto: Number(monto),
-            tipo: document.querySelector('input[name="tipoRegistro"]:checked').value
+            tipo: tipoReg
         };
 
         if(indiceEdicion > -1) registros[indiceEdicion] = dato; 
@@ -251,7 +354,11 @@ document.addEventListener('DOMContentLoaded', () => {
         
         localStorage.setItem('pelu_datos_v6', JSON.stringify(registros));
         window.cerrarModal();
-        renderizar();
+        
+        if(document.getElementById('vista-hoy').classList.contains('activa')) {
+            renderizarVistaHoy();
+        } 
+        renderizar(); // Esto asegura que el calendario general, el contador y estadísticas también se actualicen
     };
 
     document.getElementById('btnBorrar').onclick = () => {
@@ -259,6 +366,10 @@ document.addEventListener('DOMContentLoaded', () => {
             registros.splice(indiceEdicion, 1);
             localStorage.setItem('pelu_datos_v6', JSON.stringify(registros));
             window.cerrarModal();
+            
+            if(document.getElementById('vista-hoy').classList.contains('activa')) {
+                renderizarVistaHoy();
+            } 
             renderizar();
         }
     };
@@ -290,8 +401,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 etiquetas.push(nombreMes.toUpperCase());
 
                 let reg = registros.filter(r => r.fecha.startsWith(mesStr));
-                datosIngresos.push(reg.filter(r => r.tipo === 'ingreso').reduce((sum, r) => sum + r.monto, 0));
-                datosGastos.push(reg.filter(r => r.tipo === 'gasto').reduce((sum, r) => sum + r.monto, 0));
+                datosIngresos.push(reg.filter(r => r.tipo === 'ingreso').reduce((sum, r) => sum + Number(r.monto), 0));
+                datosGastos.push(reg.filter(r => r.tipo === 'gasto').reduce((sum, r) => sum + Number(r.monto), 0));
             }
         } else if (periodo === 'diario') {
             for (let i = 6; i >= 0; i--) {
@@ -301,16 +412,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 etiquetas.push(`${d.getDate()}/${d.getMonth()+1}`);
 
                 let reg = registros.filter(r => r.fecha === diaStr);
-                datosIngresos.push(reg.filter(r => r.tipo === 'ingreso').reduce((sum, r) => sum + r.monto, 0));
-                datosGastos.push(reg.filter(r => r.tipo === 'gasto').reduce((sum, r) => sum + r.monto, 0));
+                datosIngresos.push(reg.filter(r => r.tipo === 'ingreso').reduce((sum, r) => sum + Number(r.monto), 0));
+                datosGastos.push(reg.filter(r => r.tipo === 'gasto').reduce((sum, r) => sum + Number(r.monto), 0));
             }
         } else if (periodo === 'anual') {
             for (let i = 2; i >= 0; i--) {
                 let y = hoyReal.getFullYear() - i;
                 etiquetas.push(y);
                 let reg = registros.filter(r => r.fecha.startsWith(y.toString()));
-                datosIngresos.push(reg.filter(r => r.tipo === 'ingreso').reduce((sum, r) => sum + r.monto, 0));
-                datosGastos.push(reg.filter(r => r.tipo === 'gasto').reduce((sum, r) => sum + r.monto, 0));
+                datosIngresos.push(reg.filter(r => r.tipo === 'ingreso').reduce((sum, r) => sum + Number(r.monto), 0));
+                datosGastos.push(reg.filter(r => r.tipo === 'gasto').reduce((sum, r) => sum + Number(r.monto), 0));
             }
         }
 
@@ -327,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
             data: {
                 labels: etiquetas,
                 datasets: [
-                    { label: 'Ingresos', data: ingresos, backgroundColor: '#81C784', borderRadius: 4 },
+                    { label: 'Bruto', data: ingresos, backgroundColor: '#81C784', borderRadius: 4 },
                     { label: 'Gastos', data: gastos, backgroundColor: '#FFB4AB', borderRadius: 4 }
                 ]
             },

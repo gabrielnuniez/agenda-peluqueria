@@ -30,23 +30,24 @@ body {
     color: var(--md-sys-color-on-background);
     font-family: 'Roboto', sans-serif;
     margin: 0;
-    padding-bottom: 80px; /* Espacio para el Bottom Nav */
+    padding-bottom: 80px;
     overflow-x: hidden;
     -webkit-tap-highlight-color: transparent;
 }
 
-/* --- BANNER PRINCIPAL --- */
+/* --- BANNER PRINCIPAL (REDISEÑADO) --- */
 .md-banner {
     position: relative;
-    height: 180px;
+    height: 220px; /* Un poco más alto para respirar mejor */
     display: flex;
-    align-items: flex-end;
+    flex-direction: column;
+    justify-content: space-between;
     padding: 24px;
     box-sizing: border-box;
     overflow: hidden;
-    border-bottom-left-radius: 24px;
-    border-bottom-right-radius: 24px;
-    box-shadow: var(--md-sys-elevation-1);
+    border-bottom-left-radius: 32px;
+    border-bottom-right-radius: 32px;
+    box-shadow: var(--md-sys-elevation-3);
 }
 
 .banner-bg {
@@ -54,39 +55,83 @@ body {
     top: 0; left: 0; width: 100%; height: 100%;
     background-size: cover;
     background-position: center;
-    transition: background-image 0.3s ease;
+    transition: background-image 0.5s ease;
     z-index: 0;
+    /* Efecto suave de acercamiento */
+    animation: breathe 20s ease-in-out infinite alternate;
+}
+
+@keyframes breathe {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.1); }
 }
 
 .banner-overlay {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(to top, rgba(28, 27, 31, 1) 0%, rgba(28, 27, 31, 0) 100%);
+    background: linear-gradient(180deg, rgba(28,27,31,0.2) 0%, rgba(28,27,31,0.9) 100%);
     z-index: 1;
 }
 
-.banner-content {
+/* Parte superior del banner (Logo, Textos y Botón Config) */
+.banner-content-top {
     position: relative;
     z-index: 2;
-    width: 100%;
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    margin-top: 16px;
+}
+
+.banner-profile {
+    display: flex;
     align-items: center;
+    gap: 16px;
+}
+
+.avatar-circle {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    border: 2px solid rgba(255,255,255,0.1);
+}
+
+.avatar-circle span {
+    font-size: 28px;
+}
+
+.md-subtitle {
+    font-size: 14px;
+    color: var(--md-sys-color-primary);
+    font-weight: 500;
+    margin-bottom: 2px;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .md-title {
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 700;
     margin: 0;
-    letter-spacing: -0.5px;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
 .md-icon-btn {
-    background: transparent;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
     border: none;
-    color: var(--md-sys-color-on-surface);
-    width: 48px;
-    height: 48px;
+    color: #fff;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -96,8 +141,43 @@ body {
 }
 
 .md-icon-btn:active {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.2);
 }
+
+/* Parte inferior del banner (Píldoras de info) */
+.banner-content-bottom {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    width: 100%;
+}
+
+.status-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(129, 199, 132, 0.2); /* Verde de ingresos suave */
+    border: 1px solid rgba(129, 199, 132, 0.3);
+    color: #81C784;
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    backdrop-filter: blur(8px);
+}
+
+.status-pill span.material-symbols-rounded {
+    font-size: 16px;
+}
+
+.date-pill {
+    font-size: 13px;
+    color: var(--md-sys-color-on-surface-variant);
+    font-weight: 500;
+}
+
 
 /* --- NAVEGACIÓN INFERIOR (BOTTOM NAV) --- */
 .md-bottom-nav {
@@ -189,7 +269,7 @@ body {
 }
 
 #calendar-container {
-    padding: 0 16px 100px; /* Espacio para el footer y FAB */
+    padding: 0 16px 100px;
 }
 
 #calendar {
@@ -201,7 +281,6 @@ body {
     overflow: hidden;
 }
 
-/* 1. FIJAMOS LA ALTURA DE LA CELDA */
 .day {
     height: 90px;
     background: var(--md-sys-color-surface);
@@ -212,7 +291,6 @@ body {
     overflow: hidden;
 }
 
-/* 2. CREAMOS EL SCROLL INVISIBLE PARA LOS EVENTOS (PUNTITOS) */
 .day-events {
     width: 100%;
     display: flex;
@@ -226,7 +304,6 @@ body {
     display: none;
 }
 
-/* 3. ASEGURAMOS EL SCROLL EN EL MODAL DE TURNOS (BOTTOM SHEET) */
 .scroll-area {
     max-height: 50vh;
     overflow-y: auto;
@@ -242,20 +319,19 @@ body {
     border-radius: 4px;
 }
 
-/* Indicadores de Eventos */
 .event-indicator {
     width: 100%;
     height: 4px;
     border-radius: 2px;
     margin-top: 2px;
 }
-.event-ingreso { background-color: #81C784; } /* Verde suave */
+.event-ingreso { background-color: #81C784; }
 .event-gasto { background-color: var(--md-sys-color-error); }
 
 /* --- FOOTER RESUMEN --- */
 #footer-summary {
     position: fixed;
-    bottom: 96px; /* Justo arriba del Bottom Nav */
+    bottom: 96px;
     left: 16px;
     right: 16px;
     background: var(--md-sys-color-surface-container-high);
@@ -314,7 +390,7 @@ body {
 
 .md-fab span { font-size: 28px; }
 
-/* --- MODALES (BOTTOM SHEETS Y DIALOGS) --- */
+/* --- MODALES --- */
 .md-bottom-sheet, .md-dialog {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -361,7 +437,6 @@ body {
     transition: all var(--transition-standard);
 }
 
-/* Clases activas para animación */
 .md-bottom-sheet.show, .md-dialog.show { display: flex; }
 .md-bottom-sheet.show .sheet-backdrop, .md-dialog.show .dialog-backdrop { opacity: 1; }
 .md-bottom-sheet.show .sheet-content { transform: translateY(0); }
@@ -381,7 +456,7 @@ body {
     margin: 0 0 24px 0;
 }
 
-/* --- FORMULARIOS E INPUTS --- */
+/* --- FORMULARIOS --- */
 .md-input-group { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
 .row-inputs { display: flex; gap: 12px; }
 
@@ -428,7 +503,6 @@ body {
     color: var(--md-sys-color-primary);
 }
 
-/* --- BOTONES DE DIÁLOGO --- */
 .dialog-actions {
     display: flex;
     justify-content: flex-end;
@@ -465,7 +539,6 @@ body {
     display: flex; align-items: center; gap: 8px;
 }
 
-/* --- CHIPS Y RADIOS --- */
 .tipo-selector { display: flex; gap: 8px; margin-bottom: 8px; }
 .md-radio { position: relative; cursor: pointer; }
 .md-radio input { display: none; }
