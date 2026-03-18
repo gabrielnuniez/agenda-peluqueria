@@ -13,9 +13,25 @@
     
     <link rel="stylesheet" href="style.css?v=4.0">
     <link rel="manifest" href="manifest.json">
+    
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
     <meta name="theme-color" content="#1C1B1F">
 </head>
 <body>
+    <div id="bloqueoLicencia" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#1C1B1F; z-index:9999; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
+        <span class="material-symbols-rounded" style="font-size: 64px; color: var(--md-sys-color-primary); margin-bottom: 16px;">lock</span>
+        <h2 style="color:#fff;">Aplicación no activada</h2>
+        <p style="color:#CAC4D0; margin-bottom: 24px;">Ingresá el código de licencia para este dispositivo:</p>
+        <div class="md-field">
+            <input type="text" id="inputLicencia" placeholder=" " style="text-align: center; text-transform: uppercase;">
+            <label>Código de Activación</label>
+        </div>
+        <button class="md-btn btn-filled" onclick="window.validarLicencia()" style="width:100%; margin-top:16px;">ACTIVAR AHORA</button>
+        <p id="errorLicencia" style="color:#FFB4AB; margin-top:16px; font-size:14px; display:none;">Código incorrecto. Contactá al soporte.</p>
+    </div>
 
     <header class="md-banner">
         <div id="bannerBg" class="banner-bg"></div>
@@ -64,22 +80,18 @@
     </nav>
 
     <main id="app-content">
-        
         <section id="vista-calendario" class="vista activa">
             <div class="header-nav">
                 <button id="prevMonth" class="md-icon-btn"><span class="material-symbols-rounded">chevron_left</span></button>
                 <h2 id="monthYear" class="mes-titulo">--</h2>
                 <button id="nextMonth" class="md-icon-btn"><span class="material-symbols-rounded">chevron_right</span></button>
             </div>
-
             <div class="weekdays-grid">
                 <div>D</div><div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div>
             </div>
-
             <div id="calendar-container">
                 <div id="calendar"></div>
             </div>
-            
             <footer id="footer-summary" class="md-surface">
                 <div class="stat-box">
                     <span class="stat-label">Bruto</span>
@@ -94,8 +106,7 @@
                     <span id="totalNeto" class="stat-value text-primary">$ 0</span>
                 </div>
             </footer>
-
-            <button class="md-fab" onclick="window.abrirFormularioNuevo(false)" aria-label="Nuevo Registro">
+            <button class="md-fab" onclick="window.abrirFormularioNuevo(false)">
                 <span class="material-symbols-rounded">add</span>
             </button>
         </section>
@@ -105,7 +116,6 @@
                 <h2 class="section-title" style="padding: 0;">Actividad de Hoy</h2>
                 <span id="fechaHoyDisplay" style="color: var(--md-sys-color-primary); font-weight: 500;">--/--/----</span>
             </div>
-            
             <div style="display: flex; gap: 12px; margin-bottom: 24px;">
                 <div class="md-card" style="margin: 0; flex: 1; padding: 12px; text-align: center;">
                     <span style="font-size: 12px; opacity: 0.7;">Bruto Hoy</span><br>
@@ -116,17 +126,14 @@
                     <b id="gastosHoyDisplay" style="color: #FFB4AB; font-size: 18px;">$0</b>
                 </div>
             </div>
-
             <button class="md-btn btn-filled" style="width: 100%; margin-bottom: 24px; padding: 16px; border-radius: 16px;" onclick="window.abrirFormularioNuevo(false)">
                 <span class="material-symbols-rounded" style="vertical-align: middle; margin-right: 8px;">add_circle</span> NUEVO REGISTRO HOY
             </button>
-
-            <div id="listaTurnosHoyVista" class="scroll-area list-group" style="max-height: none;"></div>
+            <div id="listaTurnosHoyVista" class="scroll-area list-group"></div>
         </section>
 
         <section id="vista-reportes" class="vista oculta">
             <h2 class="section-title">Análisis de Negocio</h2>
-            
             <div class="md-card">
                 <h3>Balance General</h3>
                 <div class="filtros-tiempo">
@@ -140,18 +147,48 @@
                 </div>
             </div>
         </section>
-
     </main>
+
+    <div id="modalConfig" class="md-dialog">
+        <div class="dialog-content md-surface">
+            <h2 class="dialog-title">Configuración</h2>
+            <div class="md-input-group">
+                <div class="md-field">
+                    <input type="text" id="cfgTitulo" required placeholder=" ">
+                    <label>Nombre del Local</label>
+                </div>
+                <div class="file-upload-wrapper">
+                    <span class="upload-label">Imagen de Portada</span>
+                    <label for="cfgFondoFile" class="md-btn btn-outlined upload-btn">
+                        <span class="material-symbols-rounded">photo_library</span> Elegir fondo
+                    </label>
+                    <input type="file" id="cfgFondoFile" accept="image/*" style="display: none;">
+                    <p id="nombreArchivoFondo" class="file-name"></p>
+                </div>
+                <div class="file-upload-wrapper">
+                    <span class="upload-label">Foto de Perfil / Logo</span>
+                    <label for="cfgLogoFile" class="md-btn btn-outlined upload-btn">
+                        <span class="material-symbols-rounded">account_circle</span> Elegir foto
+                    </label>
+                    <input type="file" id="cfgLogoFile" accept="image/*" style="display: none;">
+                    <p id="nombreArchivoLogo" class="file-name"></p>
+                </div>
+            </div>
+            <div class="dialog-actions">
+                <button class="md-btn btn-text" onclick="window.cerrarConfig()">VOLVER</button>
+                <button class="md-btn btn-filled" onclick="window.guardarConfig()">APLICAR</button>
+            </div>
+        </div>
+        <div class="dialog-backdrop" onclick="window.cerrarConfig()"></div>
+    </div>
 
     <div id="modalDia" class="md-bottom-sheet">
         <div class="sheet-content md-surface">
             <div class="drag-handle"></div>
             <h2 id="fechaDiaTitulo" class="sheet-title">--/--/----</h2>
-            
             <button class="md-btn btn-filled" style="width: 100%; margin-bottom: 16px; padding: 16px; border-radius: 16px;" onclick="window.abrirFormularioNuevo(true)">
                 <span class="material-symbols-rounded" style="vertical-align: middle; margin-right: 8px;">add_circle</span> NUEVO REGISTRO AQUÍ
             </button>
-
             <div id="listaTurnosDia" class="scroll-area list-group"></div>
             <button class="md-btn btn-text" onclick="window.cerrarModalDia()">CERRAR</button>
         </div>
@@ -161,33 +198,25 @@
     <div id="modalTurno" class="md-dialog">
         <div class="dialog-content md-surface">
             <h2 id="modalTitle" class="dialog-title">Nuevo Registro</h2>
-            
             <div class="md-input-group">
                 <div class="tipo-selector">
                     <label class="md-radio">
                         <input type="radio" name="tipoRegistro" value="ingreso" checked>
-                        <span class="radio-chip ingreso">
-                            <span class="material-symbols-rounded">trending_up</span> Ingreso
-                        </span>
+                        <span class="radio-chip ingreso"><span class="material-symbols-rounded">trending_up</span> Ingreso</span>
                     </label>
                     <label class="md-radio">
                         <input type="radio" name="tipoRegistro" value="gasto">
-                        <span class="radio-chip gasto">
-                            <span class="material-symbols-rounded">trending_down</span> Gasto
-                        </span>
+                        <span class="radio-chip gasto"><span class="material-symbols-rounded">trending_down</span> Gasto</span>
                     </label>
                 </div>
-
                 <div class="md-field">
                     <input type="text" id="nombreCliente" required placeholder=" ">
                     <label>Concepto / Cliente</label>
                 </div>
-
                 <div class="md-field" id="campoTelefono">
                     <input type="tel" id="telefonoCliente" placeholder=" ">
                     <label>Teléfono (Opcional - WhatsApp)</label>
                 </div>
-
                 <div class="row-inputs">
                     <div class="md-field" id="campoHora">
                         <input type="time" id="horaTurno" required>
@@ -198,7 +227,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="dialog-actions">
                 <button class="md-btn btn-text error" id="btnBorrar" style="display:none;">ELIMINAR</button>
                 <div class="flex-spacer"></div>
@@ -209,45 +237,6 @@
         <div class="dialog-backdrop" onclick="window.cerrarModal()"></div>
     </div>
 
-    <div id="modalConfig" class="md-dialog">
-        <div class="dialog-content md-surface">
-            <h2 class="dialog-title">Configuración</h2>
-            
-            <div class="md-input-group">
-                <div class="md-field">
-                    <input type="text" id="cfgTitulo" required placeholder=" ">
-                    <label>Nombre del Local</label>
-                </div>
-                
-                <div class="file-upload-wrapper">
-                    <span class="upload-label">Imagen de Portada</span>
-                    <label for="cfgFondoFile" class="md-btn btn-outlined upload-btn">
-                        <span class="material-symbols-rounded">photo_library</span>
-                        Elegir fondo
-                    </label>
-                    <input type="file" id="cfgFondoFile" accept="image/*" style="display: none;">
-                    <p id="nombreArchivoFondo" class="file-name"></p>
-                </div>
-
-                <div class="file-upload-wrapper">
-                    <span class="upload-label">Foto de Perfil / Logo</span>
-                    <label for="cfgLogoFile" class="md-btn btn-outlined upload-btn">
-                        <span class="material-symbols-rounded">account_circle</span>
-                        Elegir foto
-                    </label>
-                    <input type="file" id="cfgLogoFile" accept="image/*" style="display: none;">
-                    <p id="nombreArchivoLogo" class="file-name"></p>
-                </div>
-            </div>
-
-            <div class="dialog-actions">
-                <button class="md-btn btn-text" onclick="window.cerrarConfig()">VOLVER</button>
-                <button class="md-btn btn-filled" onclick="window.guardarConfig()">APLICAR</button>
-            </div>
-        </div>
-        <div class="dialog-backdrop" onclick="window.cerrarConfig()"></div>
-    </div>
-
-    <script src="script.js?v=3.0"></script>
+    <script src="script.js?v=4.0"></script>
 </body>
 </html>
