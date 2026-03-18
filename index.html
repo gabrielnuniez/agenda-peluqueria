@@ -11,7 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2.0">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1C1B1F">
 </head>
@@ -20,12 +20,30 @@
     <header class="md-banner">
         <div id="bannerBg" class="banner-bg"></div>
         <div class="banner-overlay"></div>
-        <div class="banner-content">
-            <h1 id="txtBannerDisplay" class="md-title">BARBERÍA 4154</h1>
-            <div class="banner-actions">
-                <button class="md-icon-btn" onclick="window.abrirConfig()" aria-label="Configuración">
-                    <span class="material-symbols-rounded">settings</span>
-                </button>
+        
+        <div class="banner-content-top">
+            <div class="banner-profile">
+                <div class="avatar-circle">
+                    <span class="material-symbols-rounded">storefront</span>
+                </div>
+                <div>
+                    <span class="md-subtitle" id="saludoText">¡Hola!</span>
+                    <h1 id="txtBannerDisplay" class="md-title">BARBERÍA 4154</h1>
+                </div>
+            </div>
+            
+            <button class="md-icon-btn" onclick="window.abrirConfig()" aria-label="Configuración">
+                <span class="material-symbols-rounded">settings</span>
+            </button>
+        </div>
+
+        <div class="banner-content-bottom">
+            <div class="status-pill" id="contadorTurnos">
+                <span class="material-symbols-rounded">event</span>
+                <span>-- turnos hoy</span>
+            </div>
+            <div class="date-pill" id="fechaBannerDisplay">
+                --/--/----
             </div>
         </div>
     </header>
@@ -220,6 +238,6 @@
         <div class="dialog-backdrop" onclick="window.cerrarConfig()"></div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=2.0"></script>
 </body>
 </html>
